@@ -26,11 +26,15 @@ to have a record of the things that I have been trying, so it is not intended fo
 How it works
 ------------
 
-The software is divided in the following parts:
+The module is divided in the following parts:
 
- 1. `catalog_proc`: this module performs the pre-processing of the catalogs, 
- including matching, cleaning and feature extraction.
+ 1. `catalog_proc`: this module performs the pre-processing of the catalogs,  including matching,
+  cleaning and feature extraction.
  
  2. `clustering`: this module has the tools to perform the clustering, setup data, and do some benchmarks.
+ 
+ 3. `data`: this module include data relevant to tiles in the region of interest and stellar cluster to do some test.
+ 
+ 4. `test_tools`: useful functions used to perform tests
 
-Each module contains scripts with step-by-step description of how I obtain the results.
+Also, some scripts that I used are included in `scripts` folder. This are the most relevant to keep track of what I've been doing so far.
