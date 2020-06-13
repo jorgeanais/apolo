@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='apolo',
     version='0.1',
-    description='Clustering utilities for astronomical dataset',
+    description='Clustering utilities for astronomical datasets',
     author='Jorge Anais',
     url='https://github.com/jorgeanais/apolo',
     author_email='jrganais@gmail.com',
