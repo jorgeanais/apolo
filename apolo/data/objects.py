@@ -1,4 +1,4 @@
-from data.models import StellarCluster, Tile
+from apolo.data.models import StellarCluster, Tile
 
 # Tiles available, name, lmin, lmax, bmin, bmax
 # This data was obtained from the PSF VVV catalogs (raw data)

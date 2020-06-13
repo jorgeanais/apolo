@@ -1,7 +1,7 @@
 from astroquery.gaia import Gaia
 import time
 from os import path
-from data import dirconfig
+from apolo.data import dirconfig
 
 
 def download_votable(tile, offset=0.005, output_dir=dirconfig.raw_gaia):

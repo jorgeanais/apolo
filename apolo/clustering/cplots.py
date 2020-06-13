@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from data.objects import tiles, known_clusters
+from apolo.data.objects import tiles, known_clusters
 
 
 def plot_clustered_data(table):

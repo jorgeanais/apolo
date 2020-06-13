@@ -1,12 +1,11 @@
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import SkyCoord, Galactic
+from astropy.coordinates import SkyCoord
 from astropy.table import Table, hstack, vstack
 from os import path, mkdir
 from datetime import datetime
-from data import dirconfig
-from data.objects import tiles
-from sklearn.neighbors import NearestNeighbors
+from apolo.data import dirconfig
+from apolo.data.objects import tiles
 
 """
 This module contain functions related with the pre-processing of raw catalogs

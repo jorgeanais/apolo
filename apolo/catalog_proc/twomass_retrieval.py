@@ -1,5 +1,5 @@
 from astroquery.vizier import Vizier
-from data import dirconfig
+from apolo.data import dirconfig
 from astropy.coordinates import SkyCoord, Galactic
 import astropy.units as u
 from os import path

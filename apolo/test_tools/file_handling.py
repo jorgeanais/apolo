@@ -1,6 +1,6 @@
 import glob
 from os import path
-from data import objects, dirconfig
+from apolo.data import dirconfig, objects
 
 
 def which_tile(cluster, tiles):

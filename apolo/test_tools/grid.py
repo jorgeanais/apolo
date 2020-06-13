@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.table import Table
-from clustering import ctools
+from apolo.clustering import ctools
 from sklearn import metrics
 
 
