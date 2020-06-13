@@ -37,4 +37,4 @@ The module is divided in the following parts:
  
  4. `test_tools`: useful functions used to perform tests
 
-Also, some scripts that I used are included in `scripts` folder. This are the most relevant to keep track of what I've been doing so far.
+Also, some scripts that I used are included in `scripts` folder, so it's easier to keep track of what I've been doing so far.
