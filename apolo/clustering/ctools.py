@@ -24,6 +24,8 @@ def setup_data(table, space_param='Phot+PM', cols=None, scale_lb=True):
         cols = ('l', 'b', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H', 'Q', 'pmra', 'pmdec')
     elif space_param == 'PhotOnly':
         cols = ('l', 'b', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H', 'Q')
+    elif space_param == 'lb_colors':
+        cols = ('l', 'b', 'H-Ks', 'J-Ks', 'J-H', 'Q')
     elif space_param == 'custom':
         if cols is None:
             raise ValueError('You must give cols argument with the parameters in a tuple')

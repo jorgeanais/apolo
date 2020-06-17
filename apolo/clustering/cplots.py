@@ -42,7 +42,9 @@ def plot_clustered_data(table):
     kargs_cl = dict(s=50, linewidth=0, alpha=0.50, marker='.')
 
     # -----Visualization-----
-    plt.figure(1)
+    # plt.figure(1)
+    my_dpi = 150
+    plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
     for k, v in metadata.items():
         superior_title += k + '=' + str(v) + ' '
@@ -92,6 +94,7 @@ def plot_clustered_data(table):
     plt.ylim(ymax, ymin)
     plt.xlim(-1.05, 1.05)
 
+    """
     # proper motions
     plt.subplot(235)
     plt.scatter(noise['pmra'], noise['pmdec'], c=noise['color'], **kargs_noise)
@@ -120,6 +123,12 @@ def plot_clustered_data(table):
     plt.xlabel('VIRAC plx, mas', fontweight='bold')
     plt.legend(prop={'size': 10})
     plt.show()
+    """
+
+    filename = table.meta['cluster'] + '.png'
+    plt.savefig(filename, format='png', overwrite=True)
+    plt.clf()
+
 
     return True
 
