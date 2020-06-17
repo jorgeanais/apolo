@@ -1,6 +1,12 @@
 import hdbscan
 import numpy as np
 
+from apolo.clustering import cplots
+from apolo.data import dirconfig
+from apolo.test_tools.grid import perform_simple_grid_score
+from apolo.test_tools.utils import setup_region
+from os import path
+
 """
 This module contains some custom tools for clustering
 """
@@ -9,9 +15,9 @@ This module contains some custom tools for clustering
 def setup_data(table, space_param='Phot+PM', cols=None, scale_lb=True):
     """
     This function receive an astropy-table and returns a numpy array
-    with the right format for Clustering algorithms
-    :param space_param: Parameter space. It could be the two predefined ones:
-                        'Phot+PM' or 'PhotOnly'.
+    with the right format for Clustering algorithms. In this step the space-parameter is defined.
+
+    :param space_param: Parameter space. Options: 'Phot+PM', 'PhotOnly', 'lb+colors' or 'lbQ'.
                         It is also possible to define a 'custom' space parameter
                         giving a tuple with the name of the columns.
     :param scale_lb: Allow scaling l and b median zero in units of arcmin
@@ -24,8 +30,10 @@ def setup_data(table, space_param='Phot+PM', cols=None, scale_lb=True):
         cols = ('l', 'b', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H', 'Q', 'pmra', 'pmdec')
     elif space_param == 'PhotOnly':
         cols = ('l', 'b', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H', 'Q')
-    elif space_param == 'lb_colors':
+    elif space_param == 'lb+colors':
         cols = ('l', 'b', 'H-Ks', 'J-Ks', 'J-H', 'Q')
+    elif space_param == 'lbQ':
+        cols = ('l', 'b', 'Q')
     elif space_param == 'custom':
         if cols is None:
             raise ValueError('You must give cols argument with the parameters in a tuple')
@@ -84,7 +92,7 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     mcs = kargs['min_cluster_size']
     ms = kargs['min_samples']
     csm = kargs['cluster_selection_method']
-    print(f'MCS: {mcs}  MS:{ms}  CSM:{csm}')
+    # print(f'MCS: {mcs}  MS:{ms}  CSM:{csm}')
 
     # Clustering is done here
     clusterer = hdbscan.HDBSCAN(**kargs).fit(data)
@@ -105,3 +113,30 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     table.meta.update(metadata)
 
     return data, clusterer
+
+
+def clustering_routine(cluster, tile, space_param='lb+colors', data_dir=dirconfig.proc_cleaned):
+    """
+    This routine take a cluster object and a tile to perform a clustering using best values from Silluete score
+    (assuming mcs=ms) and using data in defined datadir directory
+    :param data_dir: string 
+    :param space_param: String indicating the space param
+    :param cluster: cluster object
+    :param tile: tile object
+    :return: 
+    """
+    print(cluster, tile)
+    catalog_file = tile.get_file(data_dir)
+    region = setup_region(catalog_file, cluster, times=4.0)
+    scores = perform_simple_grid_score(region, range=(10, 50), space_param=space_param, cluster_selection_method='leaf')
+    score_file = path.join(dirconfig.test_knowncl, 'score_' + tile.name + '.ecsv')
+    scores.write(score_file, format='ascii.ecsv')
+    best_param = int(scores['mcs'][0])
+
+    do_hdbscan(region, space_param=space_param,
+               min_cluster_size=best_param,
+               min_samples=best_param,
+               cluster_selection_method='leaf')
+
+    cplots.plot_clustered_data(region)
+

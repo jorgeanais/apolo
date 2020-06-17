@@ -1,12 +1,15 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+
+from apolo.data import dirconfig
 from apolo.data.objects import tiles, known_clusters
+from os import path
 
 
 def plot_clustered_data(table):
 
-    print('Plotting')
+    # print('Plotting')
     table.sort('label')
     # filtro = table['mag_Ks'] < 15.0  #TODO: quitar!!!!
     # table = table[filtro]
@@ -125,10 +128,12 @@ def plot_clustered_data(table):
     plt.show()
     """
 
-    filename = table.meta['cluster'] + '.png'
-    plt.savefig(filename, format='png', overwrite=True)
+    filename_plot = path.join(dirconfig.test_knowncl, table.meta['cluster'] + '.png')
+    plt.savefig(filename_plot, format='png', overwrite=True)
     plt.clf()
 
+    filename_table = path.join(dirconfig.test_knowncl, table.meta['cluster'] + '.fits')
+    table.write(filename_table, format='fits')
 
     return True
 

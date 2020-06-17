@@ -50,4 +50,44 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
     return results
 
 
+def perform_simple_grid_score(input_table, range=(5, 16), step=1, space_param='Phot+PM',
+                              cols=None, cluster_selection_method='leaf'):
+    """
+    This function perform the clustering algorithm in a 'small' region of the data
+    where we know before hand that exists a cluster. This functions runs a simpler version
+    that scan using min_cluster_size = min_samples, which make it run faster.
+    Returned values correspond to Silhouette score. This number tells you how good is the clustering, also it
+    returns the number of cluster detected for each combination of parameters.
+    It returns an astropy-table with the results in order from best to worst.
+    clsm param is the cluster selection method for hdbscan
+    """
+
+    pmin, pmax = range
+
+    # Make a grid of parameters
+    grid_of_params = np.arange(pmin, pmax, step)
+
+    results = Table(names=('mcs', 'ms', 'cluster_number', 'score'))
+
+    # TODO: do the grid computation in parallel
+    for param_value in grid_of_params:
+        copy_table = input_table.copy()
+        data, clusterer = ctools.do_hdbscan(copy_table, space_param=space_param,
+                                            cols=cols,
+                                            min_cluster_size=int(param_value),
+                                            min_samples=int(param_value),
+                                            cluster_selection_method=cluster_selection_method)
+
+        n_cluster = len(np.unique(clusterer.labels_))
+        if n_cluster > 2:
+            score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
+            r = [param_value, param_value, n_cluster, score]
+            results.add_row(r)
+        else:
+            score = np.nan
+
+
+    results.sort('score', reverse=True)
+
+    return results
 
