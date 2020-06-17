@@ -23,8 +23,8 @@ The original idea for this code is not just that it serves as a tool for my work
 to have a record of the things that I have been trying, so it is not intended for public use.
  
 
-How it works
-------------
+Structure
+---------
 
 The module is divided in the following parts:
 
@@ -38,3 +38,6 @@ The module is divided in the following parts:
  4. `test_tools`: useful functions used to perform tests
 
 Also, some scripts that I used are included in `scripts` folder, so it's easier to keep track of what I've been doing so far.
+
+How it works
+------------
