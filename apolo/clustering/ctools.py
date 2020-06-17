@@ -89,9 +89,9 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
         kargs['cluster_selection_method'] = 'leaf'
 
     # Print HDBSCAN* parameters
-    mcs = kargs['min_cluster_size']
-    ms = kargs['min_samples']
-    csm = kargs['cluster_selection_method']
+    # mcs = kargs['min_cluster_size']
+    # ms = kargs['min_samples']
+    # csm = kargs['cluster_selection_method']
     # print(f'MCS: {mcs}  MS:{ms}  CSM:{csm}')
 
     # Clustering is done here
@@ -129,7 +129,7 @@ def clustering_routine(cluster, tile, space_param='lb+colors', data_dir=dirconfi
     catalog_file = tile.get_file(data_dir)
     region = setup_region(catalog_file, cluster, times=4.0)
     scores = perform_simple_grid_score(region, range=(10, 50), space_param=space_param, cluster_selection_method='leaf')
-    score_file = path.join(dirconfig.test_knowncl, 'score_' + tile.name + '.ecsv')
+    score_file = path.join(dirconfig.test_knowncl, 'score_' + cluster.name + '.ecsv')
     scores.write(score_file, format='ascii.ecsv')
     best_param = int(scores['mcs'][0])
 
@@ -139,4 +139,3 @@ def clustering_routine(cluster, tile, space_param='lb+colors', data_dir=dirconfi
                cluster_selection_method='leaf')
 
     cplots.plot_clustered_data(region)
-
