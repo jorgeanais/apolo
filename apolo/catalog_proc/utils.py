@@ -12,11 +12,12 @@ This module contain functions related with the pre-processing of raw catalogs
 """
 
 
-def cals_to_fits(input_file_path, out_dir=dirconfig.proc_vvv):
+def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     """
     This function take a raw PSF tile in plain text format (.cals) and transform it to a fits file,
     removing sources that does not contain all J, H and Ks data.
     Fits files are handled with much better performance in python than plain-text files.
+    For some reason, reading .cals files uses a lot of memory (~6 gb)
     :param input_file_path: complete path to the .cals file
     :param out_dir: output directory
     :return:
@@ -62,20 +63,19 @@ def cals_to_fits(input_file_path, out_dir=dirconfig.proc_vvv):
     input_filename = path.basename(input_file_path)
     tile_name = path.splitext(input_filename.replace('zyjhk', ''))[0]
     date_time = datetime.utcnow()
-    aux.meta = {'Tile': int(tile_name),
-                'psfcat': input_filename,
-                'stage': '01 - cals to fits',
-                'cdate': date_time.strftime('%Y-%m-%d'),
-                'ctime': date_time.strftime('%H:%M:%S'),
-                'author': 'Jorge Anais'}
+    aux.meta = {'TILE': int(tile_name),
+                'VVVPSF': input_filename,
+                'STAGE': '01 - cals to fits',
+                'CDATE': date_time.strftime('%Y-%m-%d'),
+                'CTIME': date_time.strftime('%H:%M:%S'),
+                'AUTHOR': 'Jorge Anais'}
     out_fn = 't' + tile_name + '_vvv.fits'
     out_path = path.join(out_dir, out_fn)
     aux['ra', 'dec', 'oid', 'l', 'b', 'mag_J', 'er_J', 'mag_H', 'er_H',
         'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
 
 
-
-def vot_to_fits(filename, out_dir=dirconfig.proc_gaia, features=None):
+def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
     """
     This function transform extract relevant features from vo-table (from gaia query)
     in order to produce more easily manageable files
@@ -110,16 +110,16 @@ def vot_to_fits(filename, out_dir=dirconfig.proc_gaia, features=None):
     filename_out = path.join(out_dir, filename_out)
     print(f'Writting file: {filename_out}')
     date_time = datetime.utcnow()
-    filtered_tbl.meta = {'Tile': int(tile_name),
-                         'gaiac': filename,
-                         'stage': '03 - vot to fits',
-                         'cdate': date_time.strftime('%Y-%m-%d'),
-                         'ctime': date_time.strftime('%H:%M:%S'),
-                         'author': 'Jorge Anais'}
+    filtered_tbl.meta = {'TILE': int(tile_name),
+                         'GAIA': filename,
+                         'STAGE': '03 - vot to fits',
+                         'CDATE': date_time.strftime('%Y-%m-%d'),
+                         'CTIME': date_time.strftime('%H:%M:%S'),
+                         'AUTHOR': 'Jorge Anais'}
     filtered_tbl.write(filename_out, format='fits')
 
 
-def csv_to_fits(file_path, out_dir=dirconfig.proc_combis):
+def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     """
     This function simply transform combis catalogs (with proper motions) from a csv file
     to a fits file.
@@ -168,11 +168,13 @@ def csv_to_fits(file_path, out_dir=dirconfig.proc_combis):
     aux.write(out, format='fits')
 
 
-def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.proc_vvvpsf_gaia_clean,
-                  cont_dir=dirconfig.proc_vvvpsf_gaia_contaminant):
+def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.proc_vvv_gaia_clean,
+                  cont_dir=dirconfig.proc_vvv_gaia_contaminant):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
-     less than 8 kpc are considered contaminants and are removed from vvv catalog.
+    less than 8 kpc are considered contaminants and are removed from vvv catalog.
+    This function generate two tables, one with the cleaned table and the other
+    with the contaminants.
     :param clean_dir:
     :param cont_dir:
     :param fname_vvv:
@@ -397,12 +399,12 @@ def twomass_proc(file, out_dir=dirconfig.proc_2mass):
 
     date_time = datetime.utcnow()
 
-    table.meta = {'tile': int(tile_num),
-                  'file': file,
-                  'stage': '05 - 2mass sources filtered and translated to vista system',
-                  'cdate': date_time.strftime('%Y-%m-%d'),
-                  'ctime': date_time.strftime('%H:%M:%S'),
-                  'author': 'Jorge Anais'}
+    table.meta = {'TILE': int(tile_num),
+                  'FILE': file,
+                  'STAGE': '05 - 2mass sources filtered and translated to vista system',
+                  'CDATE': date_time.strftime('%Y-%m-%d'),
+                  'CTIME': date_time.strftime('%H:%M:%S'),
+                  'AUTHOR': 'Jorge Anais'}
 
     out_fn += '.fits'
     out_path = path.join(out_dir, out_fn)
@@ -422,7 +424,7 @@ def transformation_2mass_to_vista(t2mass):
     t2mass['Ks_vista'] = t2mass['Kmag'] - 0.006 * t2mass['J-Ks']
 
 
-def cat_combination(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_vvvpsf_2mass, max_error=1.00):
+def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_vvv_2mass, max_error=1.00):
     """
     This function add 2MASS sources to the VVV-PSF catalog
 
@@ -432,12 +434,19 @@ def cat_combination(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_vvvpsf_2m
     :param max_error: number
     :return:
     """
+
     twomass_table = Table.read(twomass_file, format='fits')
-    psf_table = Table.read(vvv_psf_file, format='fits')
+    vvvpsf_table = Table.read(vvv_psf_file, format='fits')
+
+    # Check if tile match
+    if not twomass_table.meta['TILE'] == vvvpsf_table.meta['TILE']:
+        raise ValueError(f'Files do not correspond to the same tile')
+    else:
+        tile_number = vvvpsf_table.meta['TILE']
 
     # Cross-match
     c2mass = SkyCoord(twomass_table['RAJ2000'], twomass_table['DEJ2000'])
-    cvvv = SkyCoord(psf_table['ra'], psf_table['dec'])
+    cvvv = SkyCoord(vvvpsf_table['ra'], vvvpsf_table['dec'])
     idx, d2d, d3d = c2mass.match_to_catalog_sky(cvvv)
     match = d2d > max_error * u.arcsec
 
@@ -467,27 +476,27 @@ def cat_combination(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_vvvpsf_2m
     aux_table = Table()
 
     # Add VVV-PSF sources to new_catalog
-    aux_table['ra'] = psf_table['ra']
-    aux_table['dec'] = psf_table['dec']
-    aux_table['l'] = psf_table['l']
-    aux_table['b'] = psf_table['b']
-    aux_table['mag_J'] = psf_table['mag_J']
-    aux_table['eJ'] = psf_table['er_J']
-    aux_table['mag_H'] = psf_table['mag_H']
-    aux_table['eH'] = psf_table['er_H']
-    aux_table['mag_Ks'] = psf_table['mag_Ks']
-    aux_table['eKs'] = psf_table['er_Ks']
-    aux_table['H-Ks'] = psf_table['H-Ks']
-    aux_table['J-Ks'] = psf_table['J-Ks']
-    aux_table['J-H'] = psf_table['J-H']
-    aux_table['catalog'] = ['PSF-VVV' for _ in range(len(psf_table))]
-    aux_table['oid'] = psf_table['oid']
+    aux_table['ra'] = vvvpsf_table['ra']
+    aux_table['dec'] = vvvpsf_table['dec']
+    aux_table['l'] = vvvpsf_table['l']
+    aux_table['b'] = vvvpsf_table['b']
+    aux_table['mag_J'] = vvvpsf_table['mag_J']
+    aux_table['eJ'] = vvvpsf_table['er_J']
+    aux_table['mag_H'] = vvvpsf_table['mag_H']
+    aux_table['eH'] = vvvpsf_table['er_H']
+    aux_table['mag_Ks'] = vvvpsf_table['mag_Ks']
+    aux_table['eKs'] = vvvpsf_table['er_Ks']
+    aux_table['H-Ks'] = vvvpsf_table['H-Ks']
+    aux_table['J-Ks'] = vvvpsf_table['J-Ks']
+    aux_table['J-H'] = vvvpsf_table['J-H']
+    aux_table['catalog'] = ['PSF-VVV' for _ in range(len(vvvpsf_table))]
+    aux_table['oid'] = vvvpsf_table['oid']
 
     output_table = vstack([unp_table, aux_table])
 
     # Add metadata to the new file
     date_time = datetime.utcnow()
-    tile = psf_table.meta['TILE']
+    tile = vvvpsf_table.meta['TILE']
     output_table.meta = {'TILE': tile,
                          'F2MASS': twomass_file,
                          'FVVV': vvv_psf_file,

@@ -60,7 +60,7 @@ def check_available_data():
     clusters = parse_catalogs(pm_catalogs)
 
     # Check cleaned tiles
-    clean_tiles = glob.glob(path.join(dirconfig.proc_vvvpsf_gaia_clean, '*.fits'))
+    clean_tiles = glob.glob(path.join(dirconfig.proc_vvv_gaia_clean, '*.fits'))
     clean_tiles.sort()
     tiles = parse_catalogs(clean_tiles)
 

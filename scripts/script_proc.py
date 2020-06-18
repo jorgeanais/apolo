@@ -23,7 +23,7 @@ utils.make_dir(dirconfig.proc_vvv)
 
 # In parallel (ram intensive)
 with mp.Pool(mp.cpu_count() - 2) as pool:
-    pool.map(utils.cals_to_fits, raw_vvv_files)
+    pool.map(utils.process_vvv_cals, raw_vvv_files)
 
 # Second step ----------------------------------------------
 # Donwnload gaia data using the script gaia_retrieval.py. Before that you need
@@ -40,12 +40,11 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
 # Third step ----------------------------------------------
 # Extract only features of interest and save to a fits file
 # Note: float missing values are filled by 1e20 (I dont know why), be careful!
-
 raw_gaia_files = glob.glob(dirconfig.raw_gaia + '/*.vot.gz')
 utils.make_dir(dirconfig.proc_gaia)
 
 with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.map(utils.vot_to_fits, raw_gaia_files)
+    pool.map(utils.process_gaia_vot, raw_gaia_files)
 
 # Fourth step -----------------------------------------------
 # Download 2MASS catalog (only tiles in the new modified region of interest)
@@ -72,7 +71,7 @@ pm_files.sort()
 utils.make_dir(dirconfig.proc_combis)
 
 with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.map(utils.csv_to_fits, pm_files)
+    pool.map(utils.process_combis_csv, pm_files)
 
 # step seven ----------------------------------------------
 # Clean the fits catalogs using parallax from gaia.
@@ -84,8 +83,8 @@ gaia_files.sort()
 vvv_files = glob.glob(dirconfig.proc_vvv + '/*.fits')
 vvv_files.sort()
 
-utils.make_dir(dirconfig.proc_vvvpsf_gaia_clean)
-utils.make_dir(dirconfig.proc_vvvpsf_gaia_contaminant)
+utils.make_dir(dirconfig.proc_vvv_gaia_clean)
+utils.make_dir(dirconfig.proc_vvv_gaia_contaminant)
 
 files = ((vvv, gaia) for vvv, gaia in zip(vvv_files, gaia_files))
 
@@ -93,30 +92,21 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(utils.gaia_cleaning, files)
 
 
-
 # Step eight
-# generate a combined catalog from 2MASS y VVV_PSF
-twomass_files = ['/home/jorge/Documents/DATA/proc/twomass_catalogs/t067_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t068_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t069_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t070_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t105_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t106_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t107_2mass.fits',
-                 '/home/jorge/Documents/DATA/proc/twomass_catalogs/t108_2mass.fits']
+# generate a combined catalog from 2MASS and VVVPSF
 
-psfvvv_files = ['/home/jorge/Documents/DATA/proc/vvv_catalogs/t067_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t068_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t069_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t070_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t105_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t106_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t107_vvv.fits',
-                '/home/jorge/Documents/DATA/proc/vvv_catalogs/t108_vvv.fits']
+tiles = [objects.t067, objects.t068, objects.t069, objects.t070,
+         objects.t105, objects.t106, objects.t107, objects.t108]
 
-files = ((twomass, vvvpsf) for twomass, vvvpsf in zip(twomass_files, psfvvv_files))
+twomass_files = []
+vvvpsf_files = []
 
-utils.make_dir(dirconfig.proc_vvvpsf_2mass)
+for t in tiles:
+    twomass_files.append(t.get_file(dirconfig.proc_2mass))
+    vvvpsf_files.append(t.get_file(dirconfig.proc_vvv))
+
+files = ((file_2mass, file_vvv) for file_2mass, file_vvv in zip(twomass_files, vvvpsf_files))
+utils.make_dir(dirconfig.proc_vvv_2mass)
 
 with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.starmap(utils.cat_combination, files)
+    pool.starmap(utils.combine_2mass_and_vvv, files)

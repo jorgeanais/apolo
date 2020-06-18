@@ -27,10 +27,10 @@ proc_gaia = path.join(proc_data, 'p_gaia')
 proc_2mass = path.join(proc_data, 'p_2mass')
 proc_combis = path.join(proc_data, 'p_combis')
 
-proc_vvvpsf_gaia_clean = path.join(proc_data, 'p_vvvpsf-gaia_clean')
-proc_vvvpsf_gaia_contaminant = path.join(proc_data, 'p_vvvpsf-gaia_contaminants')
+proc_vvv_gaia_clean = path.join(proc_data, 'p_vvvpsf-gaia_clean')
+proc_vvv_gaia_contaminant = path.join(proc_data, 'p_vvvpsf-gaia_contaminants')
 
-proc_vvvpsf_2mass = path.join(proc_data, 'p_vvvpsf-2mass')
+proc_vvv_2mass = path.join(proc_data, 'p_vvvpsf-2mass')
 
 # Tests directories
 test_knowncl = path.join(test_data, 'known_clusters')
