@@ -17,11 +17,12 @@ from the original tiles.
 # (objects with missing values are omitted)
 # It also adds and id, galactic coordinates and colors: H-Ks, J-Ks and J-H.
 
-raw_vvv_files = glob.glob(dirconfig.raw_vvvtiles + '/*.cals')
+raw_vvv_files = glob.glob(dirconfig.raw_vvvpsf + '/*.cals')
+utils.make_dir(dirconfig.proc_data)
 utils.make_dir(dirconfig.proc_vvv)
 
 # In parallel (ram intensive)
-with mp.Pool(mp.cpu_count() - 1) as pool:
+with mp.Pool(mp.cpu_count() - 2) as pool:
     pool.map(utils.cals_to_fits, raw_vvv_files)
 
 # Second step ----------------------------------------------
@@ -46,49 +47,52 @@ utils.make_dir(dirconfig.proc_gaia)
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.map(utils.vot_to_fits, raw_gaia_files)
 
-# Fourth step ----------------------------------------------
+# Fourth step -----------------------------------------------
+# Download 2MASS catalog (only tiles in the new modified region of interest)
+selection_of_tiles = [objects.t067, objects.t068, objects.t069, objects.t070, objects.t105, objects.t106,
+                      objects.t107, objects.t108]
+for t in selection_of_tiles:
+    print("Downloading: ", t)
+    twomass_retrieval.download_vot(t)
+
+# step five
+# extract AAA sources from 2mass catalog and add VVV-compatible photometry
+utils.make_dir(dirconfig.proc_2mass)
+raw_2mass_files = glob.glob(dirconfig.raw_2mass + '/*.vot')
+
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    pool.map(utils.twomass_proc, raw_2mass_files)
+
+
+# Step six ----------------------------------------------
+# transform proper motion catalog in csv format into fits
+pm_files = glob.glob(dirconfig.raw_combis + '/*.csv')
+pm_files.sort()
+
+utils.make_dir(dirconfig.proc_combis)
+
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    pool.map(utils.csv_to_fits, pm_files)
+
+# step seven ----------------------------------------------
 # Clean the fits catalogs using parallax from gaia.
 # Be careful here, files from config.proc_gaia_dir and config.proc_vvv_dir
-# should match. Otherwise, utils.gaia_cleaning() will raise an error
-# (it checks 'TILE' key in the header or meta-data)
+# should match (that is why list are sorted first).
+# utils.gaia_cleaning() will raise an error if 'TILE' key (metadata) are not equals.
 gaia_files = glob.glob(dirconfig.proc_gaia + '/*.fits')
 gaia_files.sort()
 vvv_files = glob.glob(dirconfig.proc_vvv + '/*.fits')
 vvv_files.sort()
 
-utils.make_dir(dirconfig.proc_cleaned)
-utils.make_dir(dirconfig.proc_contaminant)
+utils.make_dir(dirconfig.proc_vvvpsf_gaia_clean)
+utils.make_dir(dirconfig.proc_vvvpsf_gaia_contaminant)
 
 files = ((vvv, gaia) for vvv, gaia in zip(vvv_files, gaia_files))
 
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(utils.gaia_cleaning, files)
 
-# Step five ----------------------------------------------
-# transform proper motion catalog in csv format into fits
-pm_files = glob.glob(dirconfig.raw_pm + '/*.csv')
-pm_files.sort()
 
-utils.make_dir(dirconfig.proc_pm)
-
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.map(utils.csv_to_fits, pm_files)
-
-# Step six -----------------------------------------------
-# Download 2MASS catalog
-selection_of_tiles = [objects.t067, objects.t068, objects.t069, objects.t070, objects.t105, objects.t106, objects.t107,
-                      objects.t108]
-for t in selection_of_tiles:
-    print("Downloading: ", t)
-    twomass_retrieval.download_vot(t)
-
-# Step seven
-# generate a 2mass catalog with AAA objects and VVV magnitudes
-utils.make_dir(dirconfig.proc_2mass)
-raw_2mass_files = glob.glob(dirconfig.raw_2mass + '/*.vot')
-
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.map(utils.twomass_proc, raw_2mass_files)
 
 # Step eight
 # generate a combined catalog from 2MASS y VVV_PSF
@@ -112,7 +116,7 @@ psfvvv_files = ['/home/jorge/Documents/DATA/proc/vvv_catalogs/t067_vvv.fits',
 
 files = ((twomass, vvvpsf) for twomass, vvvpsf in zip(twomass_files, psfvvv_files))
 
-utils.make_dir(dirconfig.proc_psf_plus_2mass)
+utils.make_dir(dirconfig.proc_vvvpsf_2mass)
 
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(utils.cat_combination, files)

@@ -7,7 +7,7 @@ clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
 tiles = which_tile(clusters, objects.tiles)
 
 space_param = 'lbQ'
-data_dir = dirconfig.proc_cleaned
+data_dir = dirconfig.proc_vvvpsf_gaia_clean
 
 models = [(cl, tile, space_param, data_dir) for cl, tile in zip(clusters, tiles)]
 

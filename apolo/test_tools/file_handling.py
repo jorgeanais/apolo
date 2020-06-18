@@ -55,12 +55,12 @@ def check_available_data():
     """
 
     # Check proper motion catalogs
-    pm_catalogs = glob.glob(path.join(dirconfig.proc_pm, '*.fits'))
+    pm_catalogs = glob.glob(path.join(dirconfig.proc_combis, '*.fits'))
     pm_catalogs.sort()
     clusters = parse_catalogs(pm_catalogs)
 
     # Check cleaned tiles
-    clean_tiles = glob.glob(path.join(dirconfig.proc_cleaned, '*.fits'))
+    clean_tiles = glob.glob(path.join(dirconfig.proc_vvvpsf_gaia_clean, '*.fits'))
     clean_tiles.sort()
     tiles = parse_catalogs(clean_tiles)
 

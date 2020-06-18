@@ -73,7 +73,6 @@ def cals_to_fits(input_file_path, out_dir=dirconfig.proc_vvv):
     aux['ra', 'dec', 'oid', 'l', 'b', 'mag_J', 'er_J', 'mag_H', 'er_H',
         'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
 
-    return True
 
 
 def vot_to_fits(filename, out_dir=dirconfig.proc_gaia, features=None):
@@ -120,9 +119,9 @@ def vot_to_fits(filename, out_dir=dirconfig.proc_gaia, features=None):
     filtered_tbl.write(filename_out, format='fits')
 
 
-def csv_to_fits(file_path, out_dir=dirconfig.proc_pm):
+def csv_to_fits(file_path, out_dir=dirconfig.proc_combis):
     """
-    This function simply transform VIRAC catalogs (with proper motions) from a csv file
+    This function simply transform combis catalogs (with proper motions) from a csv file
     to a fits file.
 
     :param file_path:
@@ -162,15 +161,15 @@ def csv_to_fits(file_path, out_dir=dirconfig.proc_pm):
 
     aux.meta = {'OBJECT': object_name,
                 'FILE': file_path,
-                'STAGE': '05 - VIRAC data csv to fits',
+                'STAGE': '06 - combi data csv to fits',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
     aux.write(out, format='fits')
 
 
-def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.proc_cleaned,
-                  cont_dir=dirconfig.proc_contaminant):
+def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.proc_vvvpsf_gaia_clean,
+                  cont_dir=dirconfig.proc_vvvpsf_gaia_contaminant):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
      less than 8 kpc are considered contaminants and are removed from vvv catalog.
@@ -363,7 +362,7 @@ def files_exist(*files):
 def twomass_proc(file, out_dir=dirconfig.proc_2mass):
     """
     This function reads the votable 2MASS catalogs and extract sources that are
-    in the same region tile, and also have Qflag = AAA.
+    in the region of the respective tile, and also have Qflag = AAA.
     :type out_dir: string
     :param file: path to the 2MASS file (in vot format)
     :param out_dir: output path
@@ -400,7 +399,7 @@ def twomass_proc(file, out_dir=dirconfig.proc_2mass):
 
     table.meta = {'tile': int(tile_num),
                   'file': file,
-                  'stage': '07 - 2mass sources filtered',
+                  'stage': '05 - 2mass sources filtered and translated to vista system',
                   'cdate': date_time.strftime('%Y-%m-%d'),
                   'ctime': date_time.strftime('%H:%M:%S'),
                   'author': 'Jorge Anais'}
@@ -423,7 +422,7 @@ def transformation_2mass_to_vista(t2mass):
     t2mass['Ks_vista'] = t2mass['Kmag'] - 0.006 * t2mass['J-Ks']
 
 
-def cat_combination(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_psf_plus_2mass, max_error=1.00):
+def cat_combination(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_vvvpsf_2mass, max_error=1.00):
     """
     This function add 2MASS sources to the VVV-PSF catalog
 
