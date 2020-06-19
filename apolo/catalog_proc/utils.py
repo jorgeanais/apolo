@@ -1,4 +1,5 @@
 import numpy as np
+import glob
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, hstack, vstack
@@ -41,6 +42,31 @@ def files_exist(*files):
             raise FileNotFoundError(f'File {f} does not exist.')
 
     return True
+
+
+def check_base_data_structure():
+    """
+    This function checks if base data-structure is ok.
+    :return:
+    """
+
+    # Check base directory structure
+    base_dirs = (dirconfig.raw_data, dirconfig.proc_data, dirconfig.cross_data, dirconfig.test_data)
+
+    for folder in base_dirs:
+        if not path.exists(folder):
+            mkdir(folder)
+
+    # Check vvv psf catalogs
+    if not glob.glob(path.join(dirconfig.raw_vvv, '*.cals')):
+        raise FileNotFoundError(f'No files found in {dirconfig.raw_vvv}. Please copy vvv (*.cals) files here')
+
+    # Check combis catalogs
+    if not glob.glob(path.join(dirconfig.raw_combis, '*.csv')):
+        raise FileNotFoundError(f'No files found in {dirconfig.raw_combis}. Please copy combis (*.csv) files here')
+
+    print('Data-structure looks OK')
+
 
 def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     """
@@ -95,7 +121,7 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     date_time = datetime.utcnow()
     aux.meta = {'TILE': int(tile_name),
                 'VVVPSF': input_filename,
-                'STAGE': '01 - cals to fits',
+                'STAGE': 'VVV cals file to fits',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
@@ -142,7 +168,7 @@ def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
     date_time = datetime.utcnow()
     filtered_tbl.meta = {'TILE': int(tile_name),
                          'GAIA': filename,
-                         'STAGE': '03 - vot to fits',
+                         'STAGE': 'Gaia vot file to fits',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
@@ -191,25 +217,26 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
 
     aux.meta = {'OBJECT': object_name,
                 'FILE': file_path,
-                'STAGE': '06 - combi data csv to fits',
+                'STAGE': 'combi csv file to fits',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
     aux.write(out, format='fits')
 
 
-def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
-                  cont_dir=dirconfig.cross_vvv_gaia_contaminant):
+def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
+                  cont_dir=dirconfig.cross_vvv_gaia_cont):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
     less than 8 kpc are considered contaminants and are removed from vvv catalog.
     This function generate two tables, one with the cleaned table and the other
     with the contaminants.
-    :param clean_dir:
-    :param cont_dir:
-    :param fname_vvv:
-    :param fname_gaia:
-    :param distance:
+    :param save_contam: Boolean
+    :param clean_dir: String, output dir
+    :param cont_dir: String, output dir for contaminants
+    :param fname_vvv: String, path to the catalog to be cleaned
+    :param fname_gaia: String, path to the gaia catalog
+    :param distance: Float, distance in kpc
     :return:
     """
 
@@ -262,11 +289,11 @@ def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.cross
     date_time = datetime.utcnow()
 
     # Catalog with contaminants (objects that are closer than "distance")
-    contaminants = join_table[match]
-    contaminants.meta = {'TILE': int(tile_number),
+    contam_table = join_table[match]
+    contam_table.meta = {'TILE': int(tile_number),
                          'GAIA': fname_gaia,
                          'VVV': fname_vvv,
-                         'STAGE': '04 - matching catalogs',
+                         'STAGE': 'Gaia Cleaning',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'DIST': distance,
@@ -278,7 +305,7 @@ def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.cross
     clean_catalog.meta = {'TILE': int(tile_number),
                           'GAIA': fname_gaia,
                           'VVV': fname_vvv,
-                          'STAGE': '04 - matching catalogs',
+                          'STAGE': 'Gaia Cleaning',
                           'CDATE': date_time.strftime('%Y-%m-%d'),
                           'CTIME': date_time.strftime('%H:%M:%S'),
                           'DIST': distance,
@@ -293,8 +320,9 @@ def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.cross
     clean_catalog.write(path_out, format='fits')
 
     # Save contaminants
-    path_out = path.join(cont_dir, fname + '_contaminants.fits')
-    contaminants.write(path_out, format='fits')
+    if save_contam:
+        path_out = path.join(cont_dir, fname + '_contaminants.fits')
+        contam_table.write(path_out, format='fits')
 
 
 def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
@@ -342,7 +370,7 @@ def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
     print(f'Number of matched objects: {sum(match)}')
 
     # join table of matched sources
-    join_table = hstack([tbl_vvv, tbl_pm[idx]],uniq_col_name='{col_name}{table_name}', table_names=['', '_pm'])
+    join_table = hstack([tbl_vvv, tbl_pm[idx]], uniq_col_name='{col_name}{table_name}', table_names=['', '_pm'])
     match_table = join_table[match]
 
     # Save matched catalog
@@ -400,7 +428,7 @@ def twomass_proc(file, out_dir=dirconfig.proc_2mass):
 
     table.meta = {'TILE': int(tile_num),
                   'FILE': file,
-                  'STAGE': '05 - 2mass sources filtered and translated to vista system',
+                  'STAGE': '2mass sources proc',
                   'CDATE': date_time.strftime('%Y-%m-%d'),
                   'CTIME': date_time.strftime('%H:%M:%S'),
                   'AUTHOR': 'Jorge Anais'}
@@ -440,8 +468,6 @@ def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.cross_vv
     # Check if tile match
     if not twomass_table.meta['TILE'] == vvvpsf_table.meta['TILE']:
         raise ValueError(f'Files do not correspond to the same tile')
-    else:
-        tile_number = vvvpsf_table.meta['TILE']
 
     # Cross-match
     c2mass = SkyCoord(twomass_table['RAJ2000'], twomass_table['DEJ2000'])
@@ -499,7 +525,7 @@ def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.cross_vv
     output_table.meta = {'TILE': tile,
                          'F2MASS': twomass_file,
                          'FVVV': vvv_psf_file,
-                         'STAGE': '08 - generate a combined catalog from 2MASS y VVV_PSF',
+                         'STAGE': 'generate a combined catalog from 2MASS and VVV',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}

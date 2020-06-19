@@ -14,7 +14,7 @@ cross_data = path.join(base_data_path, 'cross')
 test_data = path.join(base_data_path, 'test')
 
 # Raw data directories
-raw_vvvpsf = path.join(raw_data, 'vvv')
+raw_vvv = path.join(raw_data, 'vvv')
 raw_gaia = path.join(raw_data, 'gaia')
 raw_combis = path.join(raw_data, 'combis')
 raw_2mass = path.join(raw_data, '2mass')
@@ -27,8 +27,9 @@ proc_combis = path.join(proc_data, 'p_combis')
 
 # Catalog crossover
 cross_vvv_gaia = path.join(cross_data, 'x_vvv-gaia')
+cross_vvv_gaia_cont = path.join(cross_data, 'x_vvv-gaia_cont')
 cross_vvv_2mass = path.join(proc_data, 'x_vvv-2mass')
-cross_vvv_gaia_contaminant = path.join(cross_data, 'x_vvv-gaia')
+
 
 # Tests directories
 test_knowncl = path.join(test_data, 'known_clusters')

@@ -19,16 +19,20 @@ This script summarize all the necessary steps to obtain final catalogs from the 
 """
 
 # Preliminars ----------------------------------------------
-# Define where the data is stored in catalog_proc.dirconfig.py file (base_path variable)
-# PSF photometry catalogs ('*.cals' files) are expected to be in ./raw/vvv_psf_phot/*.cals
+# Define where is the root of the data directory editing base_path variable in 'catalog_proc/dirconfig.py' file
+# VVV and Combis catalogs are not public. Is expected that those files will be placed in their respective folders
+# as follows:
+#  - VVV PSF photometry ('*.cals') files should be in 'raw/vvv/' folder
+#  - Combis ('*.csv') files should be in 'raw/combis/' folder
+
+utils.check_base_data_structure()
 
 # Step 1
 # Select sources that contain J, H and ks bands.
 # (objects with missing values are omitted)
 # It also adds and id, galactic coordinates and colors: H-Ks, J-Ks and J-H.
 
-raw_vvv_files = glob.glob(dirconfig.raw_vvvpsf + '/*.cals')
-utils.make_dir(dirconfig.proc_data)
+raw_vvv_files = glob.glob(dirconfig.raw_vvv + '/*.cals')
 utils.make_dir(dirconfig.proc_vvv)
 
 # In parallel (ram intensive)
@@ -94,7 +98,7 @@ vvv_files = glob.glob(dirconfig.proc_vvv + '/*.fits')
 vvv_files.sort()
 
 utils.make_dir(dirconfig.cross_vvv_gaia)
-utils.make_dir(dirconfig.cross_vvv_gaia_contaminant)
+utils.make_dir(dirconfig.cross_vvv_gaia_cont)
 
 files = ((vvv, gaia) for vvv, gaia in zip(vvv_files, gaia_files))
 
