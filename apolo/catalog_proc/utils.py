@@ -12,6 +12,36 @@ This module contain functions related with the pre-processing of raw catalogs
 """
 
 
+def make_dir(directory):
+    """
+    This function makes a new directory
+    :param directory: path to new the directory
+    :return:
+    """
+    if path.exists(directory):
+        print(f'The path {directory} already exist')
+    else:
+        try:
+            mkdir(directory)
+        except OSError:
+            print(f'Creation of the directory {directory} failed')
+        else:
+            print(f'Successfully created directory: {directory}')
+
+
+def files_exist(*files):
+    """
+    Check if files exist before processing. If not, it raises a FileNotFoundError
+    :param files:
+    :return:
+    """
+
+    for f in files:
+        if not path.exists(f):
+            raise FileNotFoundError(f'File {f} does not exist.')
+
+    return True
+
 def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     """
     This function take a raw PSF tile in plain text format (.cals) and transform it to a fits file,
@@ -168,8 +198,8 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     aux.write(out, format='fits')
 
 
-def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.proc_vvv_gaia_clean,
-                  cont_dir=dirconfig.proc_vvv_gaia_contaminant):
+def gaia_cleaning(fname_vvv, fname_gaia, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
+                  cont_dir=dirconfig.cross_vvv_gaia_contaminant):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
     less than 8 kpc are considered contaminants and are removed from vvv catalog.
@@ -330,37 +360,6 @@ def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
     return outfile
 
 
-def make_dir(directory):
-    """
-    This function makes a new directory
-    :param directory: path to new the directory
-    :return:
-    """
-    if path.exists(directory):
-        print(f'The path {directory} already exist')
-    else:
-        try:
-            mkdir(directory)
-        except OSError:
-            print(f'Creation of the directory {directory} failed')
-        else:
-            print(f'Successfully created directory: {directory}')
-
-
-def files_exist(*files):
-    """
-    Check if files exist before processing. If not, it raises a FileNotFoundError
-    :param files:
-    :return:
-    """
-
-    for f in files:
-        if not path.exists(f):
-            raise FileNotFoundError(f'File {f} does not exist.')
-
-    return True
-
-
 def twomass_proc(file, out_dir=dirconfig.proc_2mass):
     """
     This function reads the votable 2MASS catalogs and extract sources that are
@@ -424,7 +423,7 @@ def transformation_2mass_to_vista(t2mass):
     t2mass['Ks_vista'] = t2mass['Kmag'] - 0.006 * t2mass['J-Ks']
 
 
-def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.proc_vvv_2mass, max_error=1.00):
+def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):
     """
     This function add 2MASS sources to the VVV-PSF catalog
 

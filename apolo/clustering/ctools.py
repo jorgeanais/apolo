@@ -115,7 +115,7 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     return data, clusterer
 
 
-def clustering_routine(cluster, tile, space_param='lb+colors', data_dir=dirconfig.proc_vvv_gaia_clean):
+def clustering_routine(cluster, tile, space_param='lb+colors', data_dir=dirconfig.cross_vvv_gaia):
     """
     This routine take a cluster object and a tile to perform a clustering using best values from Silluete score
     (assuming mcs=ms) and using data in defined datadir directory
