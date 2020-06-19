@@ -70,6 +70,8 @@ def check_base_data_structure():
     print('Data-structure looks OK')
 
 
+# Pre-processing data ------------------------------------------------------------------------------------------------
+
 def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     """
     This function take a raw PSF tile in plain text format (.cals) and transform it to a fits file,
@@ -122,7 +124,7 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     tile_name = path.splitext(input_filename.replace('zyjhk', ''))[0]
     date_time = datetime.utcnow()
     aux.meta = {'TILE': int(tile_name),
-                'VVVPSF': input_filename,
+                'FVVV': input_filename,
                 'STAGE': 'VVV cals file to fits',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
@@ -169,12 +171,62 @@ def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
     print(f'Writting file: {filename_out}')
     date_time = datetime.utcnow()
     filtered_tbl.meta = {'TILE': int(tile_name),
-                         'GAIA': filename,
+                         'FGAIA': filename,
                          'STAGE': 'Gaia vot file to fits',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
     filtered_tbl.write(filename_out, format='fits')
+
+
+def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
+    """
+    This function reads the votable 2MASS catalogs and extract sources that are
+    in the region of the respective tile and also select sources with Qflag = AAA.
+    :type out_dir: string
+    :param file: path to the 2MASS file (in vot format)
+    :param out_dir: output path
+    :return:
+    """
+    print(file)
+    table = Table.read(file, format='votable')
+
+    out_fn = path.splitext(path.split(file)[-1])[0]
+    tile_id = out_fn.split("_")[0]
+    tile_num = tile_id.replace('t', '')
+    tile = all_tiles[tile_id]
+
+    # Add columns with magnitudes in VVV photometric system
+    transformation_2mass_to_vista(table)
+
+    # Select objects in the area of interest
+    table['RAJ2000'].unit = u.deg
+    table['DEJ2000'].unit = u.deg
+    aux = SkyCoord(ra=table['RAJ2000'], dec=table['DEJ2000']).galactic
+    table['l'] = aux.l
+    table['b'] = aux.b
+
+    lmin, lmax = tile.lmin, tile.lmax
+    bmin, bmax = tile.bmin, tile.bmax
+
+    lfilter = (table['l'] >= lmin) * (table['l'] <= lmax)
+    bfilter = (table['b'] >= bmin) * (table['b'] <= bmax)
+
+    qfilter = table['Qflg'] == 'AAA'
+    match = lfilter * bfilter * qfilter
+
+    date_time = datetime.utcnow()
+
+    table.meta = {'TILE': int(tile_num),
+                  'F2MASS': file,
+                  'STAGE': '2mass sources proc',
+                  'CDATE': date_time.strftime('%Y-%m-%d'),
+                  'CTIME': date_time.strftime('%H:%M:%S'),
+                  'AUTHOR': 'Jorge Anais'}
+
+    out_fn += '.fits'
+    out_path = path.join(out_dir, out_fn)
+    table[match].write(out_path, format='fits')
 
 
 def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
@@ -217,14 +269,16 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     out = path.join(out_dir, filename + '.fits')
     date_time = datetime.utcnow()
 
-    aux.meta = {'OBJECT': object_name,
-                'FILE': file_path,
+    aux.meta = {'TILE': object_name,
+                'FCOMBI': file_path,
                 'STAGE': 'combi csv file to fits',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
     aux.write(out, format='fits')
 
+
+# Crossover catalogs -------------------------------------------------------------------------------------------------
 
 def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
                   cont_dir=dirconfig.cross_vvv_gaia_cont):
@@ -377,10 +431,9 @@ def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
 
     # Save matched catalog
     date_time = datetime.utcnow()
-    match_table.meta = {'OBJECT': tbl_pm.meta['OBJECT'],
-                        'PMF': pm_file,
-                        'PHOTF': phot_file,
-                        'STAGE': '06 - test known clusters with pm',
+    match_table.meta = {'COMBI': pm_file,
+                        'PHOT': phot_file,
+                        'STAGE': 'Add combi proper motion',
                         'CDATE': date_time.strftime('%Y-%m-%d'),
                         'CTIME': date_time.strftime('%H:%M:%S'),
                         'AUTHOR': 'Jorge Anais'}
@@ -390,67 +443,22 @@ def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
     return outfile
 
 
-def twomass_proc(file, out_dir=dirconfig.proc_2mass):
-    """
-    This function reads the votable 2MASS catalogs and extract sources that are
-    in the region of the respective tile, and also have Qflag = AAA.
-    :type out_dir: string
-    :param file: path to the 2MASS file (in vot format)
-    :param out_dir: output path
-    :return:
-    """
-    print(file)
-    table = Table.read(file, format='votable')
-
-    out_fn = path.splitext(path.split(file)[-1])[0]
-    tile_id = out_fn.split("_")[0]
-    tile_num = tile_id.replace('t', '')
-    tile = all_tiles[tile_id]
-
-    # Add columns with magnitudes in VVV photometric system
-    transformation_2mass_to_vista(table)
-
-    # Select objects in the area of interest
-    table['RAJ2000'].unit = u.deg
-    table['DEJ2000'].unit = u.deg
-    aux = SkyCoord(ra=table['RAJ2000'], dec=table['DEJ2000']).galactic
-    table['l'] = aux.l
-    table['b'] = aux.b
-
-    lmin, lmax = tile.lmin, tile.lmax
-    bmin, bmax = tile.bmin, tile.bmax
-
-    lfilter = (table['l'] >= lmin) * (table['l'] <= lmax)
-    bfilter = (table['b'] >= bmin) * (table['b'] <= bmax)
-
-    qfilter = table['Qflg'] == 'AAA'
-    match = lfilter * bfilter * qfilter
-
-    date_time = datetime.utcnow()
-
-    table.meta = {'TILE': int(tile_num),
-                  'FILE': file,
-                  'STAGE': '2mass sources proc',
-                  'CDATE': date_time.strftime('%Y-%m-%d'),
-                  'CTIME': date_time.strftime('%H:%M:%S'),
-                  'AUTHOR': 'Jorge Anais'}
-
-    out_fn += '.fits'
-    out_path = path.join(out_dir, out_fn)
-    table[match].write(out_path, format='fits')
-
-
 def transformation_2mass_to_vista(t2mass):
     """
     Photometrical transformation from 2MASS to VISTA system.
     For more details see González-Fernández et al. (2018).
+    Same nomenclature than VVV catalogs is used here
     :param t2mass:
     :return:
     """
-    t2mass['J-Ks'] = t2mass['Jmag'] - t2mass['Kmag']
-    t2mass['J_vista'] = t2mass['Jmag'] - 0.031 * t2mass['J-Ks']
-    t2mass['H_vista'] = t2mass['Hmag'] + 0.015 * t2mass['J-Ks']
-    t2mass['Ks_vista'] = t2mass['Kmag'] - 0.006 * t2mass['J-Ks']
+    t2mass['Jmag-Kmag'] = t2mass['Jmag'] - t2mass['Kmag']
+    t2mass['mag_J'] = t2mass['Jmag'] - 0.031 * t2mass['Jmag-Kmag']
+    t2mass['mag_H'] = t2mass['Hmag'] + 0.015 * t2mass['Jmag-Kmag']
+    t2mass['mag_Ks'] = t2mass['Kmag'] - 0.006 * t2mass['Jmag-Kmag']
+
+    t2mass['H-Ks'] = t2mass['mag_H'] - t2mass['mag_Ks']
+    t2mass['J-Ks'] = t2mass['mag_J'] - t2mass['mag_Ks']
+    t2mass['J-H'] = t2mass['mag_J'] - t2mass['mag_H']
 
 
 def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):

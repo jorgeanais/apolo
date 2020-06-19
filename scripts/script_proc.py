@@ -11,8 +11,8 @@ This script summarize all the necessary steps to obtain final catalogs from the 
     4. Download 2MASS
     5. Proc 2MASS
     6. Proc combis
-    7. VVV x Gaia cleaning
-    8. VVV x 2MASS
+    7. VVV x 2MASS
+    8. VVV x Gaia cleaning
     9. VVV x 2MASS x combis
    10. VVV x combis
    11.
@@ -28,6 +28,7 @@ This script summarize all the necessary steps to obtain final catalogs from the 
 utils.check_base_data_structure()
 
 # Number of parallel processes (it could be ram intensive)
+# In my PC I have 6 cores available and 32 gb of ram
 n_processes = mp.cpu_count() - 1
 
 # Step 1
@@ -38,7 +39,7 @@ raw_vvv_files = glob.glob(dirconfig.raw_vvv + '/*.cals')
 utils.make_dir(dirconfig.proc_vvv)
 
 # parallel execution
-with mp.Pool(n_processes) as pool:
+with mp.Pool(n_processes-1) as pool:
     pool.map(utils.process_vvv_cals, raw_vvv_files)
 
 # Step 2
@@ -72,12 +73,13 @@ for tile in selection_of_tiles:
     twomass_retrieval.download_vot(tile)
 
 # Step 5
-# extract AAA sources from 2mass catalog and add VVV-compatible photometry
+# Pre-process 2MASS catalogs.
+# It extract only AAA sources from 2mass catalog (including mag in VISTA system)
 utils.make_dir(dirconfig.proc_2mass)
 raw_2mass_files = glob.glob(dirconfig.raw_2mass + '/*.vot')
 
 with mp.Pool(n_processes) as pool:
-    pool.map(utils.twomass_proc, raw_2mass_files)
+    pool.map(utils.process_2mass_vot, raw_2mass_files)
 
 
 # Step 6
@@ -127,3 +129,12 @@ utils.make_dir(dirconfig.cross_vvv_2mass)
 
 with mp.Pool(n_processes) as pool:
     pool.starmap(utils.combine_2mass_and_vvv, files)
+
+# Step 9
+# Todo: Generate VVV x 2MASS x combis catalogs
+
+# Step 10
+# Todo: Generate VVV x 2MASS x Combis
+
+# Step 11
+# Todo: Generate VVV x 2MASS x Combis x Gaia

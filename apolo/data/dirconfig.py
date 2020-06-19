@@ -19,8 +19,8 @@ raw_gaia = path.join(raw_data, 'gaia')
 raw_combis = path.join(raw_data, 'combis')
 raw_2mass = path.join(raw_data, '2mass')
 
-# Processed data directories
-proc_vvv = path.join(proc_data, 'p_vvvpsf')
+# Pre-processed data directories
+proc_vvv = path.join(proc_data, 'p_vvv')
 proc_gaia = path.join(proc_data, 'p_gaia')
 proc_2mass = path.join(proc_data, 'p_2mass')
 proc_combis = path.join(proc_data, 'p_combis')
