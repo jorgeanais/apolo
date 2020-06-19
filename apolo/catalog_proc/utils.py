@@ -6,7 +6,7 @@ from astropy.table import Table, hstack, vstack
 from os import path, mkdir
 from datetime import datetime
 from apolo.data import dirconfig
-from apolo.data.objects import tiles
+from apolo.data.objects import all_tiles
 
 """
 This module contain functions related with the pre-processing of raw catalogs
@@ -49,6 +49,8 @@ def check_base_data_structure():
     This function checks if base data-structure is ok.
     :return:
     """
+
+    print('Your base data path is:', dirconfig.base_data_path)
 
     # Check base directory structure
     base_dirs = (dirconfig.raw_data, dirconfig.proc_data, dirconfig.cross_data, dirconfig.test_data)
@@ -403,7 +405,7 @@ def twomass_proc(file, out_dir=dirconfig.proc_2mass):
     out_fn = path.splitext(path.split(file)[-1])[0]
     tile_id = out_fn.split("_")[0]
     tile_num = tile_id.replace('t', '')
-    tile = tiles[tile_id]
+    tile = all_tiles[tile_id]
 
     # Add columns with magnitudes in VVV photometric system
     transformation_2mass_to_vista(table)

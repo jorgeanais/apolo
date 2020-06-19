@@ -76,7 +76,7 @@ class Tile:
 
     def get_file(self, directory):
         """
-        This method return the file-path that correspond to this tile, in the given directory.
+        This method return the corresponding file for this tile in the given directory.
         :param directory: string
         :return: string. File path.
         """
@@ -84,7 +84,7 @@ class Tile:
         file_list.sort()
         tile_number = self._name.replace('t', '')
         reg_exp = re.compile(f'.*{tile_number}.*')
-        files = list(filter(reg_exp.match, file_list))  # Read Note
+        files = list(filter(reg_exp.match, file_list))
 
         if not files:
             raise FileNotFoundError(f'No match found for tile {self._name}')

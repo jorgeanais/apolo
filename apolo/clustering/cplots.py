@@ -3,7 +3,7 @@ import seaborn as sns
 import numpy as np
 
 from apolo.data import dirconfig
-from apolo.data.objects import tiles, known_clusters
+from apolo.data.objects import all_tiles, known_clusters
 from os import path
 
 
@@ -145,7 +145,7 @@ def makeplotroi():
     :return:
     """
     plt.figure()
-    for k, t in tiles.items():
+    for k, t in all_tiles.items():
         left = t.lmin
         bottom = t.bmin
         width = t.lmax - t.lmin

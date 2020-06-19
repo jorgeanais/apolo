@@ -4,7 +4,7 @@ from apolo.data import dirconfig, objects
 import multiprocessing as mp
 
 clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
-tiles = which_tile(clusters, objects.tiles)
+tiles = which_tile(clusters, objects.all_tiles)
 
 space_param = 'lbQ'
 data_dir = dirconfig.cross_vvv_2mass

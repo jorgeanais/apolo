@@ -1,6 +1,5 @@
 import hdbscan
 import numpy as np
-
 from apolo.clustering import cplots
 from apolo.data import dirconfig
 from apolo.test_tools.grid import perform_simple_grid_score

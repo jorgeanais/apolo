@@ -27,53 +27,56 @@ This script summarize all the necessary steps to obtain final catalogs from the 
 
 utils.check_base_data_structure()
 
+# Number of parallel processes (it could be ram intensive)
+n_processes = mp.cpu_count() - 1
+
 # Step 1
-# Select sources that contain J, H and ks bands.
-# (objects with missing values are omitted)
+# Select sources that contain J, H and ks bands in VVV PSF catalogs (objects with missing values are omitted).
 # It also adds and id, galactic coordinates and colors: H-Ks, J-Ks and J-H.
 
 raw_vvv_files = glob.glob(dirconfig.raw_vvv + '/*.cals')
 utils.make_dir(dirconfig.proc_vvv)
 
-# In parallel (ram intensive)
-with mp.Pool(mp.cpu_count() - 2) as pool:
+# parallel execution
+with mp.Pool(n_processes) as pool:
     pool.map(utils.process_vvv_cals, raw_vvv_files)
 
 # Step 2
-# Donwnload gaia data using the script gaia_retrieval.py. Before that you need
-# to edit the datos.py file adding the tile description lmin, lmax, bmin, bmax for
-# each tile. Another way is to manually download the data from the
-# web interface https://gea.esac.esa.int/archive/
+# Download gaia data. Before that you need
+# You can edit data/objects.py file to add more tiles if needed. You must provide lmin, lmax, bmin, bmax values for
+# each new tile.
+# https://gea.esac.esa.int/archive/
 # Each query takes ~10 min
 
 utils.make_dir(dirconfig.raw_gaia)
 
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.map(gaia_retrieval.download_votable, objects.tiles.values())
+with mp.Pool(n_processes) as pool:
+    pool.map(gaia_retrieval.download_votable, objects.all_tiles.values())
 
 # Step 3
-# Extract only features of interest and save to a fits file
+# Pre-process gaia data to extract only features of interest and save to a fits file.
 # Note: float missing values are filled by 1e20 (I dont know why), be careful!
+
 raw_gaia_files = glob.glob(dirconfig.raw_gaia + '/*.vot.gz')
 utils.make_dir(dirconfig.proc_gaia)
 
-with mp.Pool(mp.cpu_count() - 1) as pool:
+with mp.Pool(n_processes) as pool:
     pool.map(utils.process_gaia_vot, raw_gaia_files)
 
 # Step 4
-# Download 2MASS catalog (only tiles in the new modified region of interest)
-selection_of_tiles = [objects.t067, objects.t068, objects.t069, objects.t070, objects.t105, objects.t106,
-                      objects.t107, objects.t108]
-for t in selection_of_tiles:
-    print("Downloading: ", t)
-    twomass_retrieval.download_vot(t)
+# Download 2MASS catalog (only a selection of tiles, according to our new ROI definition)
+selection_of_tiles = objects.tiles_in_roi
+
+for tile in selection_of_tiles:
+    print("Downloading: ", tile)
+    twomass_retrieval.download_vot(tile)
 
 # Step 5
 # extract AAA sources from 2mass catalog and add VVV-compatible photometry
 utils.make_dir(dirconfig.proc_2mass)
 raw_2mass_files = glob.glob(dirconfig.raw_2mass + '/*.vot')
 
-with mp.Pool(mp.cpu_count() - 1) as pool:
+with mp.Pool(n_processes) as pool:
     pool.map(utils.twomass_proc, raw_2mass_files)
 
 
@@ -84,7 +87,7 @@ pm_files.sort()
 
 utils.make_dir(dirconfig.proc_combis)
 
-with mp.Pool(mp.cpu_count() - 1) as pool:
+with mp.Pool(n_processes) as pool:
     pool.map(utils.process_combis_csv, pm_files)
 
 # Step 7
@@ -102,7 +105,7 @@ utils.make_dir(dirconfig.cross_vvv_gaia_cont)
 
 files = ((vvv, gaia) for vvv, gaia in zip(vvv_files, gaia_files))
 
-with mp.Pool(mp.cpu_count() - 1) as pool:
+with mp.Pool(n_processes) as pool:
     pool.starmap(utils.gaia_cleaning, files)
 
 
@@ -115,12 +118,12 @@ tiles = [objects.t067, objects.t068, objects.t069, objects.t070,
 twomass_files = []
 vvvpsf_files = []
 
-for t in tiles:
-    twomass_files.append(t.get_file(dirconfig.proc_2mass))
-    vvvpsf_files.append(t.get_file(dirconfig.proc_vvv))
+for tile in tiles:
+    twomass_files.append(tile.get_file(dirconfig.proc_2mass))
+    vvvpsf_files.append(tile.get_file(dirconfig.proc_vvv))
 
 files = ((file_2mass, file_vvv) for file_2mass, file_vvv in zip(twomass_files, vvvpsf_files))
 utils.make_dir(dirconfig.cross_vvv_2mass)
 
-with mp.Pool(mp.cpu_count() - 1) as pool:
+with mp.Pool(n_processes) as pool:
     pool.starmap(utils.combine_2mass_and_vvv, files)

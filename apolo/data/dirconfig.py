@@ -7,7 +7,7 @@ from os import path
 # Base path definition
 base_data_path = '/home/jorge/Documents/DATA'
 
-# Raw data is stored in raw_data_path, meanwhile processed or intermediate-stage data is stored in 'proc_data_path'
+# Raw data is stored in raw_data_path, meanwhile processed or intermediate-stage data is stored in 'proc_data'.
 raw_data = path.join(base_data_path, 'raw')
 proc_data = path.join(base_data_path, 'proc')
 cross_data = path.join(base_data_path, 'cross')

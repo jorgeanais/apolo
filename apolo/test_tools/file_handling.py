@@ -81,7 +81,7 @@ def get_paths(cluster_name):
         raise KeyError(f'Object {cluster_name} not instantiated in data.objects')
 
     # Get tiles where cluster is contained
-    tiles = which_tile(cl, objects.tiles)
+    tiles = which_tile(cl, objects.all_tiles)
 
     # Check if cluster and tiles have available data
     available_clusters_files, available_tiles_files = check_available_data()

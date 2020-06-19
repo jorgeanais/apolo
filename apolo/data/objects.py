@@ -24,11 +24,11 @@ t111 = Tile('t111', 344.3075, 345.7748, -0.0636, 1.1314)
 t112 = Tile('t112', 345.7664, 347.2348, -0.0637, 1.1328)
 t113 = Tile('t113', 347.2252, 348.6951, -0.0639, 1.1329)
 
-new_tiles = {'t067': t067, 't068': t068}
+all_tiles = {'t067': t067, 't068': t068, 't069': t069, 't070': t070, 't071': t071, 't072': t072, 't073': t073,
+             't074': t074, 't075': t075, 't088': t088, 't105': t105, 't106': t106, 't107': t107, 't108': t108,
+             't109': t109, 't110': t110, 't111': t111, 't112': t112, 't113': t113}
 
-tiles = {'t067': t067, 't068': t068, 't069': t069, 't070': t070, 't071': t071, 't072': t072, 't073': t073,
-         't074': t074, 't075': t075, 't088': t088, 't105': t105, 't106': t106, 't107': t107, 't108': t108,
-         't109': t109, 't110': t110, 't111': t111, 't112': t112, 't113': t113}
+tiles_in_roi = (t067, t068, t069, t070, t105, t106, t107, t108)
 
 # Know clusters in the region of interest.
 # Name of the cluster should be the same than virac catalog (data.dirconfig.proc_pm)
@@ -39,19 +39,4 @@ cl86 = StellarCluster('VVVCL086', (340.0008, -0.2931), 1.17)
 cl74 = StellarCluster('VVVCL074', (336.3737, 0.1941), 1.1)
 cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 
-known_clusters = {'m81': m81, 'vdbh22': vdbh22, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88}
-
-clean_tiles_fnames = {'t069': 'tile_069_clean.fits',
-                      't070': 'tile_070_clean.fits',
-                      't071': 'tile_071_clean.fits',
-                      't072': 'tile_072_clean.fits',
-                      't073': 'tile_073_clean.fits',
-                      't074': 'tile_074_clean.fits',
-                      't075': 'tile_075_clean.fits',
-                      't107': 'tile_107_clean.fits',
-                      't108': 'tile_108_clean.fits',
-                      't109': 'tile_109_clean.fits',
-                      't110': 'tile_110_clean.fits',
-                      't111': 'tile_111_clean.fits',
-                      't112': 'tile_112_clean.fits',
-                      't113': 'tile_113_clean.fits'}
+known_clusters = {'m81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88}
