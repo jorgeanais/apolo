@@ -131,10 +131,7 @@ with mp.Pool(n_processes) as pool:
     pool.starmap(utils.combine_2mass_and_vvv, files)
 
 # Step 9
-# Todo: Generate VVV x 2MASS x combis catalogs
-
-# Step 10
 # Todo: Generate VVV x 2MASS x Combis
 
-# Step 11
+# Step 10
 # Todo: Generate VVV x 2MASS x Combis x Gaia
