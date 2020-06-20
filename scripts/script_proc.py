@@ -1,5 +1,7 @@
 import glob
-from apolo.catalog_proc import gaia_retrieval, utils, twomass_retrieval
+
+import apolo.catalog_proc.crossproc
+from apolo.catalog_proc import gaia_retrieval, utils, twomass_retrieval, preproc
 import multiprocessing as mp
 from apolo.data import objects, dirconfig
 
@@ -40,7 +42,7 @@ utils.make_dir(dirconfig.proc_vvv)
 
 # parallel execution
 with mp.Pool(n_processes-1) as pool:
-    pool.map(utils.process_vvv_cals, raw_vvv_files)
+    pool.map(preproc.process_vvv_cals, raw_vvv_files)
 
 # Step 2
 # Download gaia data. Before that you need
@@ -62,7 +64,7 @@ raw_gaia_files = glob.glob(dirconfig.raw_gaia + '/*.vot.gz')
 utils.make_dir(dirconfig.proc_gaia)
 
 with mp.Pool(n_processes) as pool:
-    pool.map(utils.process_gaia_vot, raw_gaia_files)
+    pool.map(preproc.process_gaia_vot, raw_gaia_files)
 
 # Step 4
 # Download 2MASS catalog (only a selection of tiles, according to our new ROI definition)
@@ -81,7 +83,7 @@ utils.make_dir(dirconfig.proc_2mass)
 raw_2mass_files = glob.glob(dirconfig.raw_2mass + '/*.vot')
 
 with mp.Pool(n_processes) as pool:
-    pool.map(utils.process_2mass_vot, raw_2mass_files)
+    pool.map(preproc.process_2mass_vot, raw_2mass_files)
 
 
 # Step 6
@@ -92,7 +94,7 @@ pm_files = glob.glob(dirconfig.raw_combis + '/*.csv')
 utils.make_dir(dirconfig.proc_combis)
 
 with mp.Pool(n_processes) as pool:
-    pool.map(utils.process_combis_csv, pm_files)
+    pool.map(preproc.process_combis_csv, pm_files)
 
 # Step 7
 # Clean the fits catalogs using parallax from gaia.
@@ -106,7 +108,7 @@ utils.make_dir(dirconfig.cross_vvv_gaia)
 utils.make_dir(dirconfig.cross_vvv_gaia_cont)
 
 with mp.Pool(n_processes) as pool:
-    pool.starmap(utils.gaia_cleaning, files_vvv_gaia)
+    pool.starmap(apolo.catalog_proc.crossproc.gaia_cleaning, files_vvv_gaia)
 
 
 # Step 8
@@ -116,7 +118,7 @@ files_vvv_2mass = utils.get_file_pairs(objects.tiles_in_roi, dirconfig.proc_vvv,
 utils.make_dir(dirconfig.cross_vvv_2mass)
 
 with mp.Pool(n_processes) as pool:
-    pool.starmap(utils.combine_vvv_2mass, files_vvv_2mass)
+    pool.starmap(apolo.catalog_proc.crossproc.combine_vvv_2mass, files_vvv_2mass)
 
 # Step 9
 # Generate VVV x 2MASS x Combis
