@@ -66,6 +66,7 @@ with mp.Pool(n_processes) as pool:
 
 # Step 4
 # Download 2MASS catalog (only a selection of tiles, according to our new ROI definition)
+
 selection_of_tiles = objects.tiles_in_roi
 
 for tile in selection_of_tiles:
@@ -75,6 +76,7 @@ for tile in selection_of_tiles:
 # Step 5
 # Pre-process 2MASS catalogs.
 # It extract only AAA sources from 2mass catalog (including mag in VISTA system)
+
 utils.make_dir(dirconfig.proc_2mass)
 raw_2mass_files = glob.glob(dirconfig.raw_2mass + '/*.vot')
 
@@ -84,6 +86,7 @@ with mp.Pool(n_processes) as pool:
 
 # Step 6
 # transform proper motion catalog in csv format into fits
+
 pm_files = glob.glob(dirconfig.raw_combis + '/*.csv')
 pm_files.sort()
 
@@ -97,6 +100,7 @@ with mp.Pool(n_processes) as pool:
 # Be careful here, files from config.proc_gaia_dir and config.proc_vvv_dir
 # should match (that is why list are sorted first).
 # utils.gaia_cleaning() will raise an error if 'TILE' key (metadata) are not equals.
+
 gaia_files = glob.glob(dirconfig.proc_gaia + '/*.fits')
 gaia_files.sort()
 vvv_files = glob.glob(dirconfig.proc_vvv + '/*.fits')
@@ -117,18 +121,11 @@ with mp.Pool(n_processes) as pool:
 tiles = [objects.t067, objects.t068, objects.t069, objects.t070,
          objects.t105, objects.t106, objects.t107, objects.t108]
 
-twomass_files = []
-vvvpsf_files = []
-
-for tile in tiles:
-    twomass_files.append(tile.get_file(dirconfig.proc_2mass))
-    vvvpsf_files.append(tile.get_file(dirconfig.proc_vvv))
-
-files = ((file_2mass, file_vvv) for file_2mass, file_vvv in zip(twomass_files, vvvpsf_files))
+files = utils.get_file_pairs(tiles, dirconfig.proc_vvv, dirconfig.proc_2mass)
 utils.make_dir(dirconfig.cross_vvv_2mass)
 
 with mp.Pool(n_processes) as pool:
-    pool.starmap(utils.combine_2mass_and_vvv, files)
+    pool.starmap(utils.combine_vvv_and_2mass, files)
 
 # Step 9
 # Todo: Generate VVV x 2MASS x Combis

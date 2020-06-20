@@ -6,7 +6,7 @@ from astropy.table import Table, hstack, vstack
 from os import path, mkdir
 from datetime import datetime
 from apolo.data import dirconfig
-from apolo.data.objects import all_tiles
+from apolo.data import objects
 
 """
 This module contain functions related with the pre-processing of raw catalogs
@@ -70,6 +70,25 @@ def check_base_data_structure():
     print('Data-structure looks OK')
 
 
+def get_file_pairs(tiles, dir1, dir2):
+    """
+    This functions receive a list of tile objects and two directories. It returns a iterator object
+    that contain pairs of files (one from each dir) as tuples. It is intended to be used with mp Pools.
+    :param tiles: A list with Tile objects
+    :param dir1: String. Path to a directory
+    :param dir2: String. Path to a directory
+    :return: iterable object
+    """
+    files_dir1 = []
+    files_dir2 = []
+
+    for tile in tiles:
+        files_dir1.append(tile.get_file(dir1))
+        files_dir2.append(tile.get_file(dir2))
+
+    return ((file_dir1, file_dir2) for file_dir1, file_dir2 in zip(files_dir1, files_dir2))
+
+
 # Pre-processing data ------------------------------------------------------------------------------------------------
 
 def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
@@ -95,9 +114,13 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     if not all(_ in table.columns for _ in expected_cols):
         raise KeyError(f'Table does not contain all expected columns: {expected_cols}')
 
-    # Object ID
-    object_id = np.arange(len(table))
-    table['oid'] = object_id
+    # Filename and tile number
+    input_filename = path.basename(input_file_path)
+    tile_num = path.splitext(input_filename.replace('zyjhk', ''))[0]
+
+    # Unique Object ID
+    object_id = np.arange(len(table), dtype=np.int32)
+    table['id'] = [f'vvv-t{tile_num}_{oid:07d}' for oid in object_id]
 
     path.join(out_dir, '*.fit')
 
@@ -120,16 +143,14 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     # print(f'Number of remaining sources: {len(aux)}')
 
     # Save aux table as fits file with metadata
-    input_filename = path.basename(input_file_path)
-    tile_name = path.splitext(input_filename.replace('zyjhk', ''))[0]
     date_time = datetime.utcnow()
-    aux.meta = {'TILE': int(tile_name),
+    aux.meta = {'TILE': int(tile_num),
                 'FVVV': input_filename,
                 'STAGE': 'VVV cals file to fits',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
-    out_fn = 't' + tile_name + '_vvv.fits'
+    out_fn = 't' + tile_num + '_vvv.fits'
     out_path = path.join(out_dir, out_fn)
     aux['ra', 'dec', 'oid', 'l', 'b', 'mag_J', 'er_J', 'mag_H', 'er_H',
         'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
@@ -149,30 +170,38 @@ def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
     else:
         print(f'Processing file {filename}')
 
+    # Read table
     tbl = Table.read(filename, format='votable')
+
+    tile_name = path.basename(filename).replace('_gaia.vot.gz', '')
+    tile_num = tile_name.replace('t', '')
+
+    # Unique Object ID
+    object_id = np.arange(len(tbl), dtype=np.int32)
+    tbl['id'] = [f'gaia-t{tile_name}_{oid:07d}' for oid in object_id]
 
     # Default features to be extracted from gaia votable
     if features is None:
-        features = ['source_id', 'ra', 'ra_error', 'dec', 'dec_error',
+        features = ['id', 'ra', 'ra_error', 'dec', 'dec_error',
                     'parallax', 'parallax_error', 'parallax_over_error',
                     'pmra', 'pmra_error', 'pmdec', 'pmdec_error',
                     'phot_g_mean_flux', 'phot_g_mean_flux_error', 'phot_g_mean_flux_over_error', 'phot_g_mean_mag',
                     'phot_bp_mean_flux', 'phot_bp_mean_flux_error', 'phot_bp_mean_flux_over_error', 'phot_bp_mean_mag',
                     'phot_rp_mean_flux', 'phot_rp_mean_flux_error', 'phot_rp_mean_flux_over_error', 'phot_rp_mean_mag',
                     'phot_bp_rp_excess_factor', 'bp_rp', 'bp_g', 'g_rp',
-                    'radial_velocity', 'radial_velocity_error',
+                    'radial_velocity', 'radial_velocity_error', 'source_id'
                     'l', 'b']
 
     filtered_tbl = tbl[features]
     # print(filtered_tbl.info())
-    tile_name = path.basename(filename).replace('_gaia.vot.gz', '').replace('t', '')
+
     filename_out = path.basename(filename).replace('.vot.gz', '') + '.fits'
     filename_out = path.join(out_dir, filename_out)
     print(f'Writting file: {filename_out}')
     date_time = datetime.utcnow()
-    filtered_tbl.meta = {'TILE': int(tile_name),
+    filtered_tbl.meta = {'TILE': int(tile_num),
                          'FGAIA': filename,
-                         'STAGE': 'Gaia vot file to fits',
+                         'STAGE': 'process_gaia_vot',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
@@ -191,10 +220,15 @@ def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
     print(file)
     table = Table.read(file, format='votable')
 
-    out_fn = path.splitext(path.split(file)[-1])[0]
-    tile_id = out_fn.split("_")[0]
-    tile_num = tile_id.replace('t', '')
-    tile = all_tiles[tile_id]
+    # Extract tile name and number
+    filename = path.splitext(path.split(file)[-1])[0]
+    tile_name = filename.split("_")[0]
+    tile_num = tile_name.replace('t', '')
+    tile = objects.all_tiles[tile_name]
+
+    # Unique Object ID
+    object_id = np.arange(len(table), dtype=np.int32)
+    table['id'] = [f'2mass-t{tile_name}_{oid:07d}' for oid in object_id]
 
     # Add columns with magnitudes in VVV photometric system
     transformation_2mass_to_vista(table)
@@ -219,13 +253,13 @@ def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
 
     table.meta = {'TILE': int(tile_num),
                   'F2MASS': file,
-                  'STAGE': '2mass sources proc',
+                  'STAGE': 'process_2mass_vot',
                   'CDATE': date_time.strftime('%Y-%m-%d'),
                   'CTIME': date_time.strftime('%H:%M:%S'),
                   'AUTHOR': 'Jorge Anais'}
 
-    out_fn += '.fits'
-    out_path = path.join(out_dir, out_fn)
+    filename += '.fits'
+    out_path = path.join(out_dir, filename)
     table[match].write(out_path, format='fits')
 
 
@@ -246,9 +280,13 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
 
     table = Table.read(file_path, format='csv')
 
-    # Object ID
-    object_id = np.arange(len(table))
-    table['cid'] = object_id
+    # Filename and tile number
+    filename = path.splitext(path.basename(file_path))[0]
+    tile_num = filename.split('_')[0].replace('d', '')
+
+    # Unique Object ID
+    object_id = np.arange(len(table), dtype=np.int32)
+    table['id'] = [f'vvv-t{tile_num}_{oid:07d}' for oid in object_id]
 
     # Create l and b columns
     table['ra'].unit = u.deg
@@ -264,14 +302,12 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     aux['mj-mk'] = aux['mj'] - aux['mk']
     aux['mj-mh'] = aux['mj'] - aux['mh']
 
-    filename = path.splitext(path.basename(file_path))[0]
-    object_name = filename.split('_')[0]
     out = path.join(out_dir, filename + '.fits')
     date_time = datetime.utcnow()
 
-    aux.meta = {'TILE': object_name,
+    aux.meta = {'TILE': int(tile_num),
                 'FCOMBI': file_path,
-                'STAGE': 'combi csv file to fits',
+                'STAGE': 'process_combis_csv',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
@@ -347,9 +383,9 @@ def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_
     # Catalog with contaminants (objects that are closer than "distance")
     contam_table = join_table[match]
     contam_table.meta = {'TILE': int(tile_number),
-                         'GAIA': fname_gaia,
-                         'VVV': fname_vvv,
-                         'STAGE': 'Gaia Cleaning',
+                         'FGAIA': fname_gaia,
+                         'FVVV': fname_vvv,
+                         'STAGE': 'gaia_cleaning',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'DIST': distance,
@@ -359,9 +395,9 @@ def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_
     # Cleaned catalog
     clean_catalog = tbl_vvv[~match]
     clean_catalog.meta = {'TILE': int(tile_number),
-                          'GAIA': fname_gaia,
-                          'VVV': fname_vvv,
-                          'STAGE': 'Gaia Cleaning',
+                          'FGAIA': fname_gaia,
+                          'FVVV': fname_vvv,
+                          'STAGE': 'gaia_cleaning',
                           'CDATE': date_time.strftime('%Y-%m-%d'),
                           'CTIME': date_time.strftime('%H:%M:%S'),
                           'DIST': distance,
@@ -433,7 +469,7 @@ def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
     date_time = datetime.utcnow()
     match_table.meta = {'COMBI': pm_file,
                         'PHOT': phot_file,
-                        'STAGE': 'Add combi proper motion',
+                        'STAGE': 'match_catalogs',
                         'CDATE': date_time.strftime('%Y-%m-%d'),
                         'CTIME': date_time.strftime('%H:%M:%S'),
                         'AUTHOR': 'Jorge Anais'}
@@ -452,28 +488,25 @@ def transformation_2mass_to_vista(t2mass):
     :return:
     """
     t2mass['Jmag-Kmag'] = t2mass['Jmag'] - t2mass['Kmag']
-    t2mass['mag_J'] = t2mass['Jmag'] - 0.031 * t2mass['Jmag-Kmag']
-    t2mass['mag_H'] = t2mass['Hmag'] + 0.015 * t2mass['Jmag-Kmag']
-    t2mass['mag_Ks'] = t2mass['Kmag'] - 0.006 * t2mass['Jmag-Kmag']
-
-    t2mass['H-Ks'] = t2mass['mag_H'] - t2mass['mag_Ks']
-    t2mass['J-Ks'] = t2mass['mag_J'] - t2mass['mag_Ks']
-    t2mass['J-H'] = t2mass['mag_J'] - t2mass['mag_H']
+    t2mass['J_vista'] = t2mass['Jmag'] - 0.031 * t2mass['Jmag-Kmag']
+    t2mass['H_vista'] = t2mass['Hmag'] + 0.015 * t2mass['Jmag-Kmag']
+    t2mass['Ks_vista'] = t2mass['Kmag'] - 0.006 * t2mass['Jmag-Kmag']
 
 
-def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):
+
+def combine_vvv_and_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):
     """
     This function add 2MASS sources to the VVV-PSF catalog
 
     :param twomass_file: string
-    :param vvv_psf_file: string
+    :param vvvpsf_file: string
     :param out_dir: string
     :param max_error: number
     :return:
     """
 
     twomass_table = Table.read(twomass_file, format='fits')
-    vvvpsf_table = Table.read(vvv_psf_file, format='fits')
+    vvvpsf_table = Table.read(vvvpsf_file, format='fits')
 
     # Check if tile match
     if not twomass_table.meta['TILE'] == vvvpsf_table.meta['TILE']:
@@ -534,8 +567,8 @@ def combine_2mass_and_vvv(twomass_file, vvv_psf_file, out_dir=dirconfig.cross_vv
     tile = vvvpsf_table.meta['TILE']
     output_table.meta = {'TILE': tile,
                          'F2MASS': twomass_file,
-                         'FVVV': vvv_psf_file,
-                         'STAGE': 'generate a combined catalog from 2MASS and VVV',
+                         'FVVV': vvvpsf_file,
+                         'STAGE': 'combine_vvv_and_2mass',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
