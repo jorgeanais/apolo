@@ -28,8 +28,8 @@ proc_combis = path.join(proc_data, 'p_combis')
 # Catalog crossover
 cross_vvv_gaia = path.join(cross_data, 'x_vvv-gaia')
 cross_vvv_gaia_cont = path.join(cross_data, 'x_vvv-gaia_cont')
-cross_vvv_2mass = path.join(proc_data, 'x_vvv-2mass')
-
+cross_vvv_2mass = path.join(cross_data, 'x_vvv-2mass')
+cross_vvv2mass_combis = path.join(cross_data, 'x_vvv2mass-combis')
 
 # Tests directories
 test_knowncl = path.join(test_data, 'known_clusters')

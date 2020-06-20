@@ -91,23 +91,22 @@ def get_file_pairs(tiles, dir1, dir2):
 
 # Pre-processing data ------------------------------------------------------------------------------------------------
 
-def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
+def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
     """
     This function take a raw PSF tile in plain text format (.cals) and transform it to a fits file,
     removing sources that does not contain all J, H and Ks data.
     Fits files are handled with much better performance in python than plain-text files.
     For some reason, reading .cals files uses a lot of memory (~6 gb)
-    :param input_file_path: complete path to the .cals file
+    :param input_file: String. Path to the .cals file
     :param out_dir: output directory
     :return:
     """
 
-    if not path.exists(input_file_path):
-        raise FileNotFoundError(f'Input file "{input_file_path}" does not exist.')
-    else:
-        print(f'Processing file {input_file_path}')
+    # Check if files exist
+    if files_exist(input_file):
+        print(f'Processing file {input_file}')
 
-    table = Table.read(input_file_path, format='ascii')
+    table = Table.read(input_file, format='ascii')
 
     # Check if all the columns exist in table
     expected_cols = ['ra', 'dec', 'mag_J', 'mag_H', 'mag_Ks']
@@ -115,7 +114,7 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
         raise KeyError(f'Table does not contain all expected columns: {expected_cols}')
 
     # Filename and tile number
-    input_filename = path.basename(input_file_path)
+    input_filename = path.basename(input_file)
     tile_num = path.splitext(input_filename.replace('zyjhk', ''))[0]
 
     # Unique Object ID
@@ -147,6 +146,7 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     aux.meta = {'TILE': int(tile_num),
                 'FVVV': input_filename,
                 'STAGE': 'VVV cals file to fits',
+                'CATYPE': 'vvv',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
@@ -156,24 +156,23 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
         'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
 
 
-def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
+def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
     """
     This function transform extract relevant features from vo-table (from gaia query)
     in order to produce more easily manageable files
     :param features: A list with desired features from Gaia
-    :param filename:
+    :param input_file:
     :param out_dir:
     """
 
-    if not path.exists(filename):
-        raise FileNotFoundError(f'Input file "{filename}" does not exist.')
-    else:
-        print(f'Processing file {filename}')
+    # Check if files exist
+    if files_exist(input_file):
+        print(f'Processing file {input_file}')
 
     # Read table
-    tbl = Table.read(filename, format='votable')
+    tbl = Table.read(input_file, format='votable')
 
-    tile_name = path.basename(filename).replace('_gaia.vot.gz', '')
+    tile_name = path.basename(input_file).replace('_gaia.vot.gz', '')
     tile_num = tile_name.replace('t', '')
 
     # Unique Object ID
@@ -194,33 +193,38 @@ def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
     filtered_tbl = tbl[features]
     # print(filtered_tbl.info())
 
-    filename_out = path.basename(filename).replace('.vot.gz', '') + '.fits'
+    filename_out = path.basename(input_file).replace('.vot.gz', '') + '.fits'
     filename_out = path.join(out_dir, filename_out)
     print(f'Writing file: {filename_out}')
     date_time = datetime.utcnow()
     filtered_tbl.meta = {'TILE': int(tile_num),
-                         'FGAIA': filename,
+                         'FGAIA': input_file,
                          'STAGE': 'process_gaia_vot',
+                         'CATYPE': 'gaia',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
     filtered_tbl.write(filename_out, format='fits')
 
 
-def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
+def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
     """
     This function reads the votable 2MASS catalogs and extract sources that are
     in the region of the respective tile and also select sources with Qflag = AAA.
     :type out_dir: string
-    :param file: path to the 2MASS file (in vot format)
+    :param input_file: path to the 2MASS file (in vot format)
     :param out_dir: output path
     :return:
     """
-    print(file)
-    table = Table.read(file, format='votable')
+
+    # Check if files exist
+    if files_exist(input_file):
+        print(f'Processing file {input_file}')
+
+    table = Table.read(input_file, format='votable')
 
     # Extract tile name and number
-    filename = path.splitext(path.split(file)[-1])[0]
+    filename = path.splitext(path.split(input_file)[-1])[0]
     tile_name = filename.split("_")[0]
     tile_num = tile_name.replace('t', '')
     tile = objects.all_tiles[tile_name]
@@ -251,8 +255,9 @@ def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
     date_time = datetime.utcnow()
 
     table.meta = {'TILE': int(tile_num),
-                  'F2MASS': file,
+                  'F2MASS': input_file,
                   'STAGE': 'process_2mass_vot',
+                  'CATYPE': '2mass',
                   'CDATE': date_time.strftime('%Y-%m-%d'),
                   'CTIME': date_time.strftime('%H:%M:%S'),
                   'AUTHOR': 'Jorge Anais'}
@@ -262,25 +267,24 @@ def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
     table[match].write(out_path, format='fits')
 
 
-def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
+def process_combis_csv(input_file, out_dir=dirconfig.proc_combis):
     """
     This function simply transform combis catalogs (with proper motions) from a csv file
     to a fits file.
 
-    :param file_path:
-    :param out_dir:
+    :param input_file: String. Path to the combi catalog (*.csv file)
+    :param out_dir: String. Output directory
     :return:
     """
 
-    if not path.exists(file_path):
-        raise FileNotFoundError(f'Input file "{file_path}" does not exist.')
-    else:
-        print(f'Processing file {file_path}')
+    # Check if files exist
+    if files_exist(input_file):
+        print(f'Processing file {input_file}')
 
-    table = Table.read(file_path, format='csv')
+    table = Table.read(input_file, format='csv')
 
     # Filename and tile number
-    filename = path.splitext(path.basename(file_path))[0]
+    filename = path.splitext(path.basename(input_file))[0]
     tile_num = filename.split('_')[0].replace('d', '')
 
     # Unique Object ID
@@ -303,13 +307,13 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     aux['mj-mk'] = aux['mj'] - aux['mk']
     aux['mj-mh'] = aux['mj'] - aux['mh']
 
-
     out = path.join(out_dir, filename + '.fits')
     date_time = datetime.utcnow()
 
     aux.meta = {'TILE': int(tile_num),
-                'FCOMBI': file_path,
+                'FCOMBI': input_file,
                 'STAGE': 'process_combis_csv',
+                'CATYPE': 'combi',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
@@ -318,98 +322,84 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
 
 # Crossover catalogs -------------------------------------------------------------------------------------------------
 
-def gaia_cleaning(fname_vvv, fname_gaia, save_contam=True, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
+def gaia_cleaning(fname_phot, fname_gaia, save_contam=True, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
                   cont_dir=dirconfig.cross_vvv_gaia_cont):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
     less than 8 kpc are considered contaminants and are removed from vvv catalog.
     This function generate two tables, one with the cleaned table and the other
     with the contaminants.
+
+    :param fname_phot: String, path to the catalog to be cleaned
+    :param fname_gaia: String, path to the gaia catalog
     :param save_contam: Boolean
+    :param distance: Float, distance in kpc
     :param clean_dir: String, output dir
     :param cont_dir: String, output dir for contaminants
-    :param fname_vvv: String, path to the catalog to be cleaned
-    :param fname_gaia: String, path to the gaia catalog
-    :param distance: Float, distance in kpc
     :return:
     """
 
     # Check if files exist
-    if files_exist(fname_vvv, fname_gaia):
-        print(f'Processing files ------------------------------------------')
-        print(fname_vvv)
-        print(fname_gaia)
+    if files_exist(fname_phot, fname_gaia):
+        print(f'Processing files: ', fname_phot, fname_gaia)
 
     # Load tables
-    tbl_vvv = Table.read(fname_vvv, format='fits')
+    tbl_phot = Table.read(fname_phot, format='fits')
     tbl_gaia = Table.read(fname_gaia, format='fits')
 
     # Check if tile match
-    if not tbl_vvv.meta['TILE'] == tbl_gaia.meta['TILE']:
+    if not tbl_phot.meta['TILE'] == tbl_gaia.meta['TILE']:
         raise ValueError(f'Files do not correspond to the same tile')
-    else:
-        tile_number = tbl_vvv.meta['TILE']
 
-    # Print number of data-points in both catalogs
-    # print('Number of object original VVV catalog:')
-    # print(len(tbl_vvv))
-    # print('Number of object original Gaia catalog:')
-    # print(len(tbl_gaia))
+    tile_number = tbl_phot.meta['TILE']
 
     # Apply threshold to gaia data
-    # TODO: here we can apply a more sophisticated criteria in order to select sources within the distance
     threshold = 1.0 / distance
     match_parallax = (tbl_gaia['parallax'] >= threshold) * (tbl_gaia['parallax'] < 1e20)
     tbl_gaia_par = tbl_gaia[match_parallax]
 
     # Cross-match
-    cvvv = SkyCoord(tbl_vvv['ra'], tbl_vvv['dec'])
+    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'])
     cgaia = SkyCoord(tbl_gaia_par['ra'], tbl_gaia_par['dec'])
-    idx, d2d, d3d = cvvv.match_to_catalog_sky(cgaia)
+    idx, d2d, d3d = cphot.match_to_catalog_sky(cgaia)
     match = d2d < 0.34 * u.arcsec
 
-    # Check that for every matched gaia source there are only one VVV source
-    # if len(idx[match]) - len(np.unique(idx[match])) == 0:
-    #     print('It is ok')
-    # else:
-    #     print('Ups, no 1-1 cross-match')
-    #     print(len(idx[match]) - len(np.unique(idx[match])))
-
-    # Print number of object that are in both catalogs
-    # print(f'number of matching objects : {len(cvvv[match])}')
-
     # join table of matched sources
-    join_table = hstack([tbl_vvv, tbl_gaia_par[idx]])
-    date_time = datetime.utcnow()
+    join_table = hstack([tbl_phot, tbl_gaia_par[idx]])
 
     # Catalog with contaminants (objects that are closer than "distance")
     contam_table = join_table[match]
+
+    # Add metadata
+    catype = tbl_phot.meta['CATYPE'] + '-' + tbl_gaia.meta['CATYPE']
+    date_time = datetime.utcnow()
     contam_table.meta = {'TILE': int(tile_number),
                          'FGAIA': fname_gaia,
-                         'FVVV': fname_vvv,
+                         'FPHOT': fname_phot,
                          'STAGE': 'gaia_cleaning',
+                         'CATYPE': catype + 'CONT',
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'DIST': distance,
                          'SELECT': 'contaminants',
                          'NDUPL': len(idx[match]) - len(np.unique(idx[match])),
                          'AUTHOR': 'Jorge Anais'}
+
     # Cleaned catalog
-    clean_catalog = tbl_vvv[~match]
+    clean_catalog = tbl_phot[~match]
     clean_catalog.meta = {'TILE': int(tile_number),
                           'FGAIA': fname_gaia,
-                          'FVVV': fname_vvv,
+                          'FPHOT': fname_phot,
                           'STAGE': 'gaia_cleaning',
+                          'CATYPE': catype,
                           'CDATE': date_time.strftime('%Y-%m-%d'),
                           'CTIME': date_time.strftime('%H:%M:%S'),
                           'DIST': distance,
                           'SELECT': 'clean',
                           'AUTHOR': 'Jorge Anais'}
 
-    # print(f'number of objects in cleaned catalog: {len(clean_catalog)}')
-
     # Save clean catalog to a fits file
-    fname = f't{tile_number:03d}'
+    fname = f't{tile_number:03d}_{catype}'
     path_out = path.join(clean_dir, fname + '_clean.fits')
     clean_catalog.write(path_out, format='fits')
 
@@ -419,74 +409,13 @@ def gaia_cleaning(fname_vvv, fname_gaia, save_contam=True, distance=8.0, clean_d
         contam_table.write(path_out, format='fits')
 
 
-def match_catalogs(pm_file, phot_file, out_dir=dirconfig.test_knowncl):
-    """
-    Function that match proper motion catalog and VVV clean catalogs.
-    :param pm_file:
-    :param phot_file:
-    :param out_dir:
-    :return:
-    """
-
-    # Check if files exist
-    if files_exist(pm_file, phot_file):
-        print(f'Processing files ------------------------------------------')
-        print(pm_file)
-        print(phot_file)
-
-    # Setup names and output file
-    pm_cat_name = path.splitext(path.basename(pm_file))[0].split('_')[0]
-    phot_cat_name = path.splitext(path.basename(phot_file))[0]
-    filename = pm_cat_name + '_' + phot_cat_name
-    outfile = path.join(out_dir, filename) + '.fits'
-
-    # Check if output already exists, if so, exit
-    if path.exists(outfile):
-        return outfile
-
-    tbl_pm = Table.read(pm_file, format='fits')
-    tbl_pm['ra'].unit = u.deg
-    tbl_pm['dec'].unit = u.deg
-
-    tbl_vvv = Table.read(phot_file, format='fits')
-
-    # Cross-match
-    cvvv = SkyCoord(tbl_vvv['ra'], tbl_vvv['dec'])
-    cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'])
-    idx, d2d, d3d = cvvv.match_to_catalog_sky(cpm)
-    match = d2d < 0.34 * u.arcsec
-
-    # Check that for every matched source there are only one counterpart
-    # If 0 is ok, otherwise there are some confusion
-    print(f'If this number is 0 is ok: {len(idx[match]) - len(np.unique(idx[match]))}')
-
-    # Objects that are in both catalogs
-    print(f'Number of matched objects: {sum(match)}')
-
-    # join table of matched sources
-    join_table = hstack([tbl_vvv, tbl_pm[idx]], uniq_col_name='{col_name}{table_name}', table_names=['', '_pm'])
-    match_table = join_table[match]
-
-    # Save matched catalog
-    date_time = datetime.utcnow()
-    match_table.meta = {'COMBI': pm_file,
-                        'PHOT': phot_file,
-                        'STAGE': 'match_catalogs',
-                        'CDATE': date_time.strftime('%Y-%m-%d'),
-                        'CTIME': date_time.strftime('%H:%M:%S'),
-                        'AUTHOR': 'Jorge Anais'}
-
-    match_table.write(outfile, format='fits', overwrite=True)
-
-    return outfile
-
-
 def transformation_2mass_to_vista(t2mass):
     """
     Photometrical transformation from 2MASS to VISTA system.
     For more details see González-Fernández et al. (2018).
     Same nomenclature than VVV catalogs is used here
-    :param t2mass:
+
+    :param t2mass: A 2MASS astropy table.
     :return:
     """
     t2mass['Jmag-Kmag'] = t2mass['Jmag'] - t2mass['Kmag']
@@ -495,8 +424,7 @@ def transformation_2mass_to_vista(t2mass):
     t2mass['Ks_vista'] = t2mass['Kmag'] - 0.006 * t2mass['Jmag-Kmag']
 
 
-
-def combine_vvv_and_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):
+def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):
     """
     This function add 2MASS sources to the VVV-PSF catalog
 
@@ -506,6 +434,10 @@ def combine_vvv_and_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv
     :param max_error: number
     :return:
     """
+
+    # Check if files exist
+    if files_exist(twomass_file, vvvpsf_file):
+        print('Combining: ', vvvpsf_file, twomass_file)
 
     twomass_table = Table.read(twomass_file, format='fits')
     vvvpsf_table = Table.read(vvvpsf_file, format='fits')
@@ -540,7 +472,7 @@ def combine_vvv_and_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv
     unp_table['J-Ks'] = unpaired_2mass_sources['J_vista'] - unpaired_2mass_sources['Ks_vista']
     unp_table['J-H'] = unpaired_2mass_sources['J_vista'] - unpaired_2mass_sources['H_vista']
     unp_table['catalog'] = ['2MASS' for _ in range(len(unpaired_2mass_sources))]
-    unp_table['_2MASS'] = unpaired_2mass_sources['_2MASS']
+    unp_table['id'] = unpaired_2mass_sources['id']
 
     # Aux catalog for VVV-PSF sources
     aux_table = Table()
@@ -560,23 +492,85 @@ def combine_vvv_and_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv
     aux_table['J-Ks'] = vvvpsf_table['J-Ks']
     aux_table['J-H'] = vvvpsf_table['J-H']
     aux_table['catalog'] = ['PSF-VVV' for _ in range(len(vvvpsf_table))]
-    aux_table['oid'] = vvvpsf_table['oid']
+    aux_table['id'] = vvvpsf_table['id']
 
     output_table = vstack([unp_table, aux_table])
 
     # Add metadata to the new file
     date_time = datetime.utcnow()
     tile = vvvpsf_table.meta['TILE']
+    catype = vvvpsf_table.meta['CATYPE'] + '-' + twomass_table.meta['CATYPE']
     output_table.meta = {'TILE': tile,
                          'F2MASS': twomass_file,
+                         'N2MASS': len(unp_table),
                          'FVVV': vvvpsf_file,
+                         'NVVV': len(vvvpsf_table),
                          'STAGE': 'combine_vvv_and_2mass',
+                         'CATYPE': catype,
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
 
     # Write out output table
-
-    fname = f't{tile:03d}_vvv_plus_2mass.fits'
+    fname = f't{tile:03d}_{catype}.fits'
     output_file = path.join(out_dir, fname)
     output_table.write(output_file, format='fits')
+
+
+def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
+    """
+    Function that match proper motion catalog and VVV clean catalogs.
+    :param pm_file:
+    :param phot_file:
+    :param out_dir:
+    :return:
+    """
+
+    # Check if files exist
+    if files_exist(pm_file, phot_file):
+        print(f'Processing files:', phot_file, pm_file)
+
+    # Read tables
+    tbl_phot = Table.read(phot_file, format='fits')
+    tbl_pm = Table.read(pm_file, format='fits')
+    tbl_pm['ra'].unit = u.deg
+    tbl_pm['dec'].unit = u.deg
+
+    # Check if tile numbers match
+    if not tbl_phot.meta['TILE'] == tbl_pm.meta['TILE']:
+        raise ValueError(f'Files do not correspond to the same tile')
+
+    # Cross-match
+    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'])
+    cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'])
+    idx, d2d, d3d = cphot.match_to_catalog_sky(cpm)
+    match = d2d < 0.34 * u.arcsec
+
+    # Check that for every matched source there are only one counterpart
+    # If 0 is ok, otherwise there are some confusion
+    print(f'If this number is 0 is ok: {len(idx[match]) - len(np.unique(idx[match]))}')
+
+    # Objects that are in both catalogs
+    print(f'Number of matched objects: {sum(match)}')
+
+    # join table of matched sources
+    join_table = hstack([tbl_phot, tbl_pm[idx]], uniq_col_name='{col_name}{table_name}', table_names=['', '_pm'])
+    match_table = join_table[match]
+
+    # Setup names and output file
+    tile_number = tbl_phot.meta['TILE']
+    catype = tbl_phot.meta['CATYPE'] + '-' + tbl_pm.meta['CATYPE']
+    date_time = datetime.utcnow()
+    match_table.meta = {'TILE': tile_number,
+                        'COMBI': pm_file,
+                        'PHOT': phot_file,
+                        'STAGE': 'match_catalogs',
+                        'CATYPE': catype,
+                        'CDATE': date_time.strftime('%Y-%m-%d'),
+                        'CTIME': date_time.strftime('%H:%M:%S'),
+                        'AUTHOR': 'Jorge Anais'}
+
+    # Save file
+    fname = f't{tile_number:03d}_{catype}.fits'
+    outfile = path.join(out_dir, fname)
+    match_table.write(outfile, format='fits', overwrite=True)

@@ -116,10 +116,15 @@ files_vvv_2mass = utils.get_file_pairs(objects.tiles_in_roi, dirconfig.proc_vvv,
 utils.make_dir(dirconfig.cross_vvv_2mass)
 
 with mp.Pool(n_processes) as pool:
-    pool.starmap(utils.combine_vvv_and_2mass, files_vvv_2mass)
+    pool.starmap(utils.combine_vvv_2mass, files_vvv_2mass)
 
 # Step 9
-# Todo: Generate VVV x 2MASS x Combis
+# Generate VVV x 2MASS x Combis
+
+files_vvv2mass_combis = utils.get_file_pairs(objects.tiles_in_roi, dirconfig.cross_vvv_2mass, dirconfig.proc_combis)
+utils.make_dir(dirconfig.cross_vvv2mass_combis)
+
+
 
 # Step 10
 # Todo: Generate VVV x 2MASS x Combis x Gaia
