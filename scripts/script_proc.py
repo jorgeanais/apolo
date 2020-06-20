@@ -88,7 +88,6 @@ with mp.Pool(n_processes) as pool:
 # transform proper motion catalog in csv format into fits
 
 pm_files = glob.glob(dirconfig.raw_combis + '/*.csv')
-pm_files.sort()
 
 utils.make_dir(dirconfig.proc_combis)
 
@@ -101,31 +100,23 @@ with mp.Pool(n_processes) as pool:
 # should match (that is why list are sorted first).
 # utils.gaia_cleaning() will raise an error if 'TILE' key (metadata) are not equals.
 
-gaia_files = glob.glob(dirconfig.proc_gaia + '/*.fits')
-gaia_files.sort()
-vvv_files = glob.glob(dirconfig.proc_vvv + '/*.fits')
-vvv_files.sort()
+files_vvv_gaia = utils.get_file_pairs(objects.tiles_in_roi, dirconfig.proc_vvv, dirconfig.proc_gaia)
 
 utils.make_dir(dirconfig.cross_vvv_gaia)
 utils.make_dir(dirconfig.cross_vvv_gaia_cont)
 
-files = ((vvv, gaia) for vvv, gaia in zip(vvv_files, gaia_files))
-
 with mp.Pool(n_processes) as pool:
-    pool.starmap(utils.gaia_cleaning, files)
+    pool.starmap(utils.gaia_cleaning, files_vvv_gaia)
 
 
 # Step 8
 # generate a combined catalog from VVV and 2MASS
 
-tiles = [objects.t067, objects.t068, objects.t069, objects.t070,
-         objects.t105, objects.t106, objects.t107, objects.t108]
-
-files = utils.get_file_pairs(tiles, dirconfig.proc_vvv, dirconfig.proc_2mass)
+files_vvv_2mass = utils.get_file_pairs(objects.tiles_in_roi, dirconfig.proc_vvv, dirconfig.proc_2mass)
 utils.make_dir(dirconfig.cross_vvv_2mass)
 
 with mp.Pool(n_processes) as pool:
-    pool.starmap(utils.combine_vvv_and_2mass, files)
+    pool.starmap(utils.combine_vvv_and_2mass, files_vvv_2mass)
 
 # Step 9
 # Todo: Generate VVV x 2MASS x Combis

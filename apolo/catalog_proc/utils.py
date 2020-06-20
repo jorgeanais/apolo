@@ -119,7 +119,7 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
     tile_num = path.splitext(input_filename.replace('zyjhk', ''))[0]
 
     # Unique Object ID
-    object_id = np.arange(len(table), dtype=np.int32)
+    object_id = np.arange(len(table), dtype=np.int32) + 1
     table['id'] = [f'vvv-t{tile_num}_{oid:07d}' for oid in object_id]
 
     path.join(out_dir, '*.fit')
@@ -152,7 +152,7 @@ def process_vvv_cals(input_file_path, out_dir=dirconfig.proc_vvv):
                 'AUTHOR': 'Jorge Anais'}
     out_fn = 't' + tile_num + '_vvv.fits'
     out_path = path.join(out_dir, out_fn)
-    aux['ra', 'dec', 'oid', 'l', 'b', 'mag_J', 'er_J', 'mag_H', 'er_H',
+    aux['id', 'ra', 'dec', 'l', 'b', 'mag_J', 'er_J', 'mag_H', 'er_H',
         'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
 
 
@@ -177,27 +177,26 @@ def process_gaia_vot(filename, out_dir=dirconfig.proc_gaia, features=None):
     tile_num = tile_name.replace('t', '')
 
     # Unique Object ID
-    object_id = np.arange(len(tbl), dtype=np.int32)
-    tbl['id'] = [f'gaia-t{tile_name}_{oid:07d}' for oid in object_id]
+    object_id = np.arange(len(tbl), dtype=np.int32) + 1
+    tbl['id'] = [f'gaia-{tile_name}_{oid:07d}' for oid in object_id]
 
     # Default features to be extracted from gaia votable
     if features is None:
-        features = ['id', 'ra', 'ra_error', 'dec', 'dec_error',
+        features = ['id', 'ra', 'ra_error', 'dec', 'dec_error', 'l', 'b',
                     'parallax', 'parallax_error', 'parallax_over_error',
                     'pmra', 'pmra_error', 'pmdec', 'pmdec_error',
                     'phot_g_mean_flux', 'phot_g_mean_flux_error', 'phot_g_mean_flux_over_error', 'phot_g_mean_mag',
                     'phot_bp_mean_flux', 'phot_bp_mean_flux_error', 'phot_bp_mean_flux_over_error', 'phot_bp_mean_mag',
                     'phot_rp_mean_flux', 'phot_rp_mean_flux_error', 'phot_rp_mean_flux_over_error', 'phot_rp_mean_mag',
                     'phot_bp_rp_excess_factor', 'bp_rp', 'bp_g', 'g_rp',
-                    'radial_velocity', 'radial_velocity_error', 'source_id'
-                    'l', 'b']
+                    'radial_velocity', 'radial_velocity_error', 'source_id']
 
     filtered_tbl = tbl[features]
     # print(filtered_tbl.info())
 
     filename_out = path.basename(filename).replace('.vot.gz', '') + '.fits'
     filename_out = path.join(out_dir, filename_out)
-    print(f'Writting file: {filename_out}')
+    print(f'Writing file: {filename_out}')
     date_time = datetime.utcnow()
     filtered_tbl.meta = {'TILE': int(tile_num),
                          'FGAIA': filename,
@@ -227,8 +226,8 @@ def process_2mass_vot(file, out_dir=dirconfig.proc_2mass):
     tile = objects.all_tiles[tile_name]
 
     # Unique Object ID
-    object_id = np.arange(len(table), dtype=np.int32)
-    table['id'] = [f'2mass-t{tile_name}_{oid:07d}' for oid in object_id]
+    object_id = np.arange(len(table), dtype=np.int32) + 1
+    table['id'] = [f'2mass-{tile_name}_{oid:07d}' for oid in object_id]
 
     # Add columns with magnitudes in VVV photometric system
     transformation_2mass_to_vista(table)
@@ -285,8 +284,8 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     tile_num = filename.split('_')[0].replace('d', '')
 
     # Unique Object ID
-    object_id = np.arange(len(table), dtype=np.int32)
-    table['id'] = [f'vvv-t{tile_num}_{oid:07d}' for oid in object_id]
+    object_id = np.arange(len(table), dtype=np.int32) + 1
+    table['id'] = [f'combi-t{tile_num}_{oid:07d}' for oid in object_id]
 
     # Create l and b columns
     table['ra'].unit = u.deg
@@ -296,11 +295,14 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
     table['b'] = aux.b
 
     # Create colors
-    mask = ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk'])
+    # ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk']) *\
+    mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec'])
+
     aux = table[mask]
     aux['mh-mk'] = aux['mh'] - aux['mk']
     aux['mj-mk'] = aux['mj'] - aux['mk']
     aux['mj-mh'] = aux['mj'] - aux['mh']
+
 
     out = path.join(out_dir, filename + '.fits')
     date_time = datetime.utcnow()
@@ -316,7 +318,7 @@ def process_combis_csv(file_path, out_dir=dirconfig.proc_combis):
 
 # Crossover catalogs -------------------------------------------------------------------------------------------------
 
-def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
+def gaia_cleaning(fname_vvv, fname_gaia, save_contam=True, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
                   cont_dir=dirconfig.cross_vvv_gaia_cont):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
@@ -349,10 +351,10 @@ def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_
         tile_number = tbl_vvv.meta['TILE']
 
     # Print number of data-points in both catalogs
-    print('Number of object original VVV catalog:')
-    print(len(tbl_vvv))
-    print('Number of object original Gaia catalog:')
-    print(len(tbl_gaia))
+    # print('Number of object original VVV catalog:')
+    # print(len(tbl_vvv))
+    # print('Number of object original Gaia catalog:')
+    # print(len(tbl_gaia))
 
     # Apply threshold to gaia data
     # TODO: here we can apply a more sophisticated criteria in order to select sources within the distance
@@ -367,14 +369,14 @@ def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_
     match = d2d < 0.34 * u.arcsec
 
     # Check that for every matched gaia source there are only one VVV source
-    if len(idx[match]) - len(np.unique(idx[match])) == 0:
-        print('It is ok')
-    else:
-        print('Ups, no 1-1 cross-match')
-        print(len(idx[match]) - len(np.unique(idx[match])))
+    # if len(idx[match]) - len(np.unique(idx[match])) == 0:
+    #     print('It is ok')
+    # else:
+    #     print('Ups, no 1-1 cross-match')
+    #     print(len(idx[match]) - len(np.unique(idx[match])))
 
     # Print number of object that are in both catalogs
-    print(f'number of matching objects : {len(cvvv[match])}')
+    # print(f'number of matching objects : {len(cvvv[match])}')
 
     # join table of matched sources
     join_table = hstack([tbl_vvv, tbl_gaia_par[idx]])
@@ -404,7 +406,7 @@ def gaia_cleaning(fname_vvv, fname_gaia, save_contam=False, distance=8.0, clean_
                           'SELECT': 'clean',
                           'AUTHOR': 'Jorge Anais'}
 
-    print(f'number of objects in cleaned catalog: {len(clean_catalog)}')
+    # print(f'number of objects in cleaned catalog: {len(clean_catalog)}')
 
     # Save clean catalog to a fits file
     fname = f't{tile_number:03d}'
