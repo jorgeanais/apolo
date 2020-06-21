@@ -17,8 +17,6 @@ This script summarize all the necessary steps to obtain final catalogs from the 
    10. VVV x 2MASS
    11. VVV x 2MASS x combis
    12. VVV x 2MASS x combis x Gaia Cleaning
-
-   
 """
 
 # Preliminars ----------------------------------------------
@@ -148,16 +146,37 @@ with mp.Pool(n_processes) as pool:
 # Step 10 -----------------------------------------------------------------------------------------------------------
 # VVV x 2MASS. Generate a combined catalog from VVV and 2MASS
 
-files_vvv_2mass = utils.get_func_args_iterator(objects.tiles_in_roi, dirconfig.proc_vvv, dirconfig.proc_2mass)
+args_vvv_2mass = utils.get_func_args_iterator(objects.tiles_in_roi,
+                                              dirconfig.proc_vvv,
+                                              dirconfig.proc_2mass)
 utils.make_dir(dirconfig.cross_vvv_2mass)
 
 with mp.Pool(n_processes) as pool:
-    pool.starmap(crossproc.combine_vvv_2mass, files_vvv_2mass)
+    pool.starmap(crossproc.combine_vvv_2mass, args_vvv_2mass)
 
 
 # Step 11 -----------------------------------------------------------------------------------------------------------
 # VVV x 2MASS x combis. Combine photometrical catalogs (VVV and 2MASS) with proper motions from VIRAC
 
+args_vvv_2mass_combis = utils.get_func_args_iterator(objects.tiles_in_roi,
+                                                     dirconfig.cross_vvv_2mass,
+                                                     dirconfig.proc_combis,
+                                                     dirconfig.cross_vvv_2mass_combis)
+utils.make_dir(dirconfig.cross_vvv_2mass_combis)
+
+with mp.Pool(n_processes) as pool:
+    pool.starmap(crossproc.add_proper_motions, args_vvv_2mass_combis)
 
 # Step 12 -----------------------------------------------------------------------------------------------------------
 # VVV x 2MASS x combis x Gaia. Apply gaia cleaning to combined VVV-2MASS sources and VIRAC proper motions
+
+args_vvv_2mass_combis_gaia = utils.get_func_args_iterator(objects.tiles_in_roi,
+                                                          dirconfig.cross_vvv_2mass_combis,
+                                                          dirconfig.proc_gaia,
+                                                          dirconfig.cross_vvv_2mass_combis_gaia,
+                                                          dirconfig.cross_vvv_2mass_combis_gaia_cont)
+
+utils.make_dir(dirconfig.cross_vvv_2mass_combis_gaia, dirconfig.cross_vvv_2mass_combis_gaia_cont)
+
+with mp.Pool(n_processes) as pool:
+    pool.starmap(crossproc.gaia_cleaning, args_vvv_2mass_combis_gaia)
