@@ -1,5 +1,9 @@
 from apolo.data.models import StellarCluster, Tile
 
+"""
+This module contains all the info about tiles and known cluster
+"""
+
 # Tiles available, name, lmin, lmax, bmin, bmax
 # This data was obtained from the PSF VVV catalogs (raw data)
 # name for tile should be 't' + 3 digit number

@@ -3,32 +3,35 @@ from os import path, mkdir
 from apolo.data import dirconfig
 
 """
-This module contain functions related with the pre-processing of raw catalogs
+This module contain utility functions related with the pre-processing of catalogs
 """
 
 
-def make_dir(directory):
+def make_dir(*directories):
     """
-    This function makes a new directory
+    This function makes a new directory.
+
     :param directory: path to new the directory
     :return:
     """
-    if path.exists(directory):
-        print(f'The path {directory} already exist')
-    else:
-        try:
-            mkdir(directory)
-        except OSError:
-            print(f'Creation of the directory {directory} failed')
+    for directory in directories:
+        if path.exists(directory):
+            print(f'The path {directory} already exist')
         else:
-            print(f'Successfully created directory: {directory}')
+            try:
+                mkdir(directory)
+            except OSError:
+                print(f'Creation of the directory {directory} failed')
+            else:
+                print(f'Successfully created directory: {directory}')
 
 
 def files_exist(*files):
     """
-    Check if files exist before processing. If not, it raises a FileNotFoundError
-    :param files:
-    :return:
+    Check if files exist before processing. If not, it raises a FileNotFoundError.
+
+    :param files: any number of arguments, each of them is a file-path (string)
+    :return: Boolean
     """
 
     for f in files:
@@ -41,12 +44,13 @@ def files_exist(*files):
 def check_base_data_structure():
     """
     This function checks if base data-structure is ok.
+
     :return:
     """
 
     print('Your base data path is:', dirconfig.base_data_path)
 
-    # Check base directory structure
+    # Check if all directories exist
     base_dirs = (dirconfig.raw_data, dirconfig.proc_data, dirconfig.cross_data, dirconfig.test_data)
 
     for folder in base_dirs:
@@ -64,13 +68,15 @@ def check_base_data_structure():
     print('Data-structure looks OK')
 
 
-def get_file_pairs(tiles, dir1, dir2):
+def get_func_args_iterator(tiles, dir1, dir2, *out_dir):
     """
-    This functions receive a list of tile objects and two directories. It returns a iterator object
-    that contain pairs of files (one from each dir) as tuples. It is intended to be used with mp Pools.
+    This functions receive a list of tile-objects, two directories to be scan and the output(s) dir(s).
+    It returns an iterator object with the arguments for any 'cross.function' in order to be used in a MP Pool.
+
     :param tiles: A list with Tile objects
     :param dir1: String. Path to a directory
     :param dir2: String. Path to a directory
+    :param out_dir: String. Path to a directory
     :return: iterable object
     """
     files_dir1 = []
@@ -80,5 +86,4 @@ def get_file_pairs(tiles, dir1, dir2):
         files_dir1.append(tile.get_file(dir1))
         files_dir2.append(tile.get_file(dir2))
 
-    return ((file_dir1, file_dir2) for file_dir1, file_dir2 in zip(files_dir1, files_dir2))
-
+    return ((file_dir1, file_dir2, *out_dir) for file_dir1, file_dir2 in zip(files_dir1, files_dir2))

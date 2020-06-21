@@ -9,13 +9,18 @@ from astropy.table import Table
 from apolo.catalog_proc.utils import files_exist
 from apolo.data import dirconfig, objects
 
+"""
+This sub-module contains functions used to pre-process raw catalogs
+"""
+
 
 def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
     """
     This function take a raw PSF tile in plain text format (.cals) and transform it to a fits file,
     removing sources that does not contain all J, H and Ks data.
     Fits files are handled with much better performance in python than plain-text files.
-    For some reason, reading .cals files uses a lot of memory (~6 gb)
+    For some reason, reading .cals files uses a lot of memory (~6 gb).
+
     :param input_file: String. Path to the .cals file
     :param out_dir: output directory
     :return:
@@ -63,7 +68,7 @@ def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
     # Save aux table as fits file with metadata
     date_time = datetime.utcnow()
     aux.meta = {'TILE': int(tile_num),
-                'FVVV': input_filename,
+                'FVVV': input_file,
                 'STAGE': 'VVV cals file to fits',
                 'CATYPE': 'vvv',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
@@ -78,7 +83,8 @@ def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
 def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
     """
     This function transform extract relevant features from vo-table (from gaia query)
-    in order to produce more easily manageable files
+    in order to produce more easily manageable files.
+
     :param features: A list with desired features from Gaia
     :param input_file:
     :param out_dir:
@@ -145,6 +151,7 @@ def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
     """
     This function reads the votable 2MASS catalogs and extract sources that are
     in the region of the respective tile and also select sources with Qflag = AAA.
+
     :type out_dir: string
     :param input_file: path to the 2MASS file (in vot format)
     :param out_dir: output path
@@ -233,7 +240,6 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis):
     table['b'] = aux.b
 
     # Create colors
-    # ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk']) *\
     mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec'])
 
     aux = table[mask]
@@ -252,5 +258,3 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis):
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
     aux.write(out, format='fits')
-
-

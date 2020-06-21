@@ -1,7 +1,7 @@
 from os import path
 
 """
-  In this module, the directory structure is defined with shortcuts for each directory.
+In this module, the directory structure is defined with shortcuts for each directory.
 """
 
 # Base path definition
@@ -28,8 +28,13 @@ proc_combis = path.join(proc_data, 'p_combis')
 # Catalog crossover
 cross_vvv_gaia = path.join(cross_data, 'x_vvv-gaia')
 cross_vvv_gaia_cont = path.join(cross_data, 'x_vvv-gaia_cont')
+cross_vvv_combis = path.join(cross_data, 'x_vvv-combis')
+cross_vvv_combis_gaia = path.join(cross_data, 'x_vvv-combis-gaia')
+cross_vvv_combis_gaia_cont = path.join(cross_data, 'x_vvv-combis-gaia_cont')
 cross_vvv_2mass = path.join(cross_data, 'x_vvv-2mass')
-cross_vvv2mass_combis = path.join(cross_data, 'x_vvv2mass-combis')
+cross_vvv_2mass_combis = path.join(cross_data, 'x_vvv-2mass-combis')
+cross_vvv_2mass_combis_gaia = path.join(cross_data, 'x_vvv-2mass-combis-gaia')
+cross_vvv_2mass_combis_gaia_cont = path.join(cross_data, 'x_vvv-2mass-combis-gaia_cont')
 
 # Tests directories
 test_knowncl = path.join(test_data, 'known_clusters')

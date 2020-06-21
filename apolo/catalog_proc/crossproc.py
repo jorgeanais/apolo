@@ -9,9 +9,15 @@ from astropy.table import Table, hstack, vstack
 from apolo.catalog_proc.utils import files_exist
 from apolo.data import dirconfig
 
+"""
+This sub-module contains functions used to complement data from different catalogs.
+"""
 
-def gaia_cleaning(fname_phot, fname_gaia, save_contam=True, distance=8.0, clean_dir=dirconfig.cross_vvv_gaia,
-                  cont_dir=dirconfig.cross_vvv_gaia_cont):
+
+def gaia_cleaning(fname_phot, fname_gaia,
+                  clean_dir=dirconfig.cross_vvv_gaia,
+                  cont_dir=dirconfig.cross_vvv_gaia_cont,
+                  save_contam=True, distance=8.0):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
     less than 8 kpc are considered contaminants and are removed from vvv catalog.
@@ -20,10 +26,10 @@ def gaia_cleaning(fname_phot, fname_gaia, save_contam=True, distance=8.0, clean_
 
     :param fname_phot: String, path to the catalog to be cleaned
     :param fname_gaia: String, path to the gaia catalog
-    :param save_contam: Boolean
-    :param distance: Float, distance in kpc
     :param clean_dir: String, output dir
     :param cont_dir: String, output dir for contaminants
+    :param save_contam: Boolean
+    :param distance: Float, distance in kpc
     :return:
     """
 
@@ -61,30 +67,30 @@ def gaia_cleaning(fname_phot, fname_gaia, save_contam=True, distance=8.0, clean_
     # Add metadata
     catype = tbl_phot.meta['CATYPE'] + '-' + tbl_gaia.meta['CATYPE']
     date_time = datetime.utcnow()
-    contam_table.meta = {'TILE': int(tile_number),
-                         'FGAIA': fname_gaia,
-                         'FPHOT': fname_phot,
-                         'STAGE': 'gaia_cleaning',
-                         'CATYPE': catype + 'CONT',
-                         'CDATE': date_time.strftime('%Y-%m-%d'),
-                         'CTIME': date_time.strftime('%H:%M:%S'),
-                         'DIST': distance,
-                         'SELECT': 'contaminants',
-                         'NDUPL': len(idx[match]) - len(np.unique(idx[match])),
-                         'AUTHOR': 'Jorge Anais'}
+    contam_table.meta.update({'TILE': int(tile_number),
+                              'FGAIA': fname_gaia,
+                              'FPHOT': fname_phot,
+                              'STAGE': 'gaia_cleaning',
+                              'CATYPE': catype + 'CONT',
+                              'CDATE': date_time.strftime('%Y-%m-%d'),
+                              'CTIME': date_time.strftime('%H:%M:%S'),
+                              'DIST': distance,
+                              'SELECT': 'contaminants',
+                              'NDUPL': len(idx[match]) - len(np.unique(idx[match])),
+                              'AUTHOR': 'Jorge Anais'})
 
     # Cleaned catalog
     clean_catalog = tbl_phot[~match]
-    clean_catalog.meta = {'TILE': int(tile_number),
-                          'FGAIA': fname_gaia,
-                          'FPHOT': fname_phot,
-                          'STAGE': 'gaia_cleaning',
-                          'CATYPE': catype,
-                          'CDATE': date_time.strftime('%Y-%m-%d'),
-                          'CTIME': date_time.strftime('%H:%M:%S'),
-                          'DIST': distance,
-                          'SELECT': 'clean',
-                          'AUTHOR': 'Jorge Anais'}
+    clean_catalog.meta.update({'TILE': int(tile_number),
+                               'FGAIA': fname_gaia,
+                               'FPHOT': fname_phot,
+                               'STAGE': 'gaia_cleaning',
+                               'CATYPE': catype,
+                               'CDATE': date_time.strftime('%Y-%m-%d'),
+                               'CTIME': date_time.strftime('%H:%M:%S'),
+                               'DIST': distance,
+                               'SELECT': 'clean',
+                               'AUTHOR': 'Jorge Anais'})
 
     # Save clean catalog to a fits file
     fname = f't{tile_number:03d}_{catype}'
@@ -173,16 +179,16 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
     date_time = datetime.utcnow()
     tile = vvvpsf_table.meta['TILE']
     catype = vvvpsf_table.meta['CATYPE'] + '-' + twomass_table.meta['CATYPE']
-    output_table.meta = {'TILE': tile,
-                         'F2MASS': twomass_file,
-                         'N2MASS': len(unp_table),
-                         'FVVV': vvvpsf_file,
-                         'NVVV': len(vvvpsf_table),
-                         'STAGE': 'combine_vvv_and_2mass',
-                         'CATYPE': catype,
-                         'CDATE': date_time.strftime('%Y-%m-%d'),
-                         'CTIME': date_time.strftime('%H:%M:%S'),
-                         'AUTHOR': 'Jorge Anais'}
+    output_table.meta.update({'TILE': tile,
+                              'F2MASS': twomass_file,
+                              'N2MASS': len(unp_table),
+                              'FVVV': vvvpsf_file,
+                              'NVVV': len(vvvpsf_table),
+                              'STAGE': 'combine_vvv_2mass',
+                              'CATYPE': catype,
+                              'CDATE': date_time.strftime('%Y-%m-%d'),
+                              'CTIME': date_time.strftime('%H:%M:%S'),
+                              'AUTHOR': 'Jorge Anais'})
 
     # Write out output table
     fname = f't{tile:03d}_{catype}.fits'
@@ -219,13 +225,6 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
     idx, d2d, d3d = cphot.match_to_catalog_sky(cpm)
     match = d2d < 0.34 * u.arcsec
 
-    # Check that for every matched source there are only one counterpart
-    # If 0 is ok, otherwise there are some confusion
-    print(f'If this number is 0 is ok: {len(idx[match]) - len(np.unique(idx[match]))}')
-
-    # Objects that are in both catalogs
-    print(f'Number of matched objects: {sum(match)}')
-
     # join table of matched sources
     join_table = hstack([tbl_phot, tbl_pm[idx]], uniq_col_name='{col_name}{table_name}', table_names=['', '_pm'])
     match_table = join_table[match]
@@ -234,14 +233,17 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
     tile_number = tbl_phot.meta['TILE']
     catype = tbl_phot.meta['CATYPE'] + '-' + tbl_pm.meta['CATYPE']
     date_time = datetime.utcnow()
-    match_table.meta = {'TILE': tile_number,
-                        'COMBI': pm_file,
-                        'PHOT': phot_file,
-                        'STAGE': 'match_catalogs',
-                        'CATYPE': catype,
-                        'CDATE': date_time.strftime('%Y-%m-%d'),
-                        'CTIME': date_time.strftime('%H:%M:%S'),
-                        'AUTHOR': 'Jorge Anais'}
+    match_table.meta.update({'TILE': tile_number,
+                             'FCOMBI': pm_file,
+                             'FPHOT': phot_file,
+                             'STAGE': 'add_proper_motions',
+                             'CATYPE': catype,
+                             'NPHOT': len(tbl_phot),
+                             'NCOMBI': len(tbl_pm),
+                             'NDUPL': len(idx[match]) - len(np.unique(idx[match])),
+                             'CDATE': date_time.strftime('%Y-%m-%d'),
+                             'CTIME': date_time.strftime('%H:%M:%S'),
+                             'AUTHOR': 'Jorge Anais'})
 
     # Save file
     fname = f't{tile_number:03d}_{catype}.fits'
