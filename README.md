@@ -31,7 +31,7 @@ The module is divided in the following parts:
  1. `catalog_proc`: this module performs the pre-processing of the catalogs,  including matching,
   cleaning and feature extraction.
  
- 2. `clustering`: this module has the tools to perform the clustering, setup data, and do some benchmarks.
+ 2. `clustering`: this module has the tools to perform the clustering and setup data.
  
  3. `data`: this module include data relevant to tiles in the region of interest and stellar cluster to do some test.
  
