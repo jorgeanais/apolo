@@ -42,7 +42,7 @@ Folder Structure
 ----------------
 
 Catalogs are created/saved in a folder structure for their posterior usage. The folder structure is
-defined in `data/dirconfig.py` file. 
+defined in `apolo/data/dirconfig.py` file. 
 
 ```
 DATA/
