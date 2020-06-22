@@ -74,7 +74,7 @@ DATA/
 Installation
 ------------
 
-1. First, you need to modify where base data directory is. To do that, edit the file apolo/data/dirconfig.py in line 8.
+1. First, you need to modify where base data directory is. To do that, edit the file `apolo/data/dirconfig.py` in line 8.
 ```
 ...
 # Base path definition
