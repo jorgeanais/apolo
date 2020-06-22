@@ -74,11 +74,19 @@ DATA/
 Installation
 ------------
 
-1. To install Apolo, move to the folder where the setup.py is and then just execute
+1. First, you need to modify where base data directory is. To do that, edit the file apolo/data/dirconfig.py in line 8.
+```
+...
+# Base path definition
+base_data_path = '/path/to/DATA'
+...
+```
+2. To install Apolo, move to the folder where the setup.py is and then just execute
 
 ```
 pip install -e .
 ```
+
 
 Usage
 -----
