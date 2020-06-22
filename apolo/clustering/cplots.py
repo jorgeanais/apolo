@@ -7,9 +7,20 @@ from apolo.data.objects import all_tiles, known_clusters
 from os import path
 
 
-def plot_clustered_data(table):
+def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
+    """
+    This function helps to visualize the results of do_hdbscan function. It produces the followings plots:
+      - l vs b
+      - J-H vs H-Ks
+      - Ks vs J-Ks
+      - Q vs Ks
+      - PM_dec vs PM_ra
+      - parallax histogram
 
-    # print('Plotting')
+    :param table: An astropy table produced by apolo.clustering.ctools.do_hdbscan() function.
+    :param output_dir: string. Path to a dir where output are saved
+    :return:
+    """
     table.sort('label')
     # filtro = table['mag_Ks'] < 15.0  #TODO: quitar!!!!
     # table = table[filtro]
@@ -41,7 +52,7 @@ def plot_clustered_data(table):
         superior_title += 'No metadata available'
 
     # Common parameters for ptl.scatter
-    kargs_noise = dict(s=50, linewidth=0,  alpha=0.10, marker='.')
+    kargs_noise = dict(s=50, linewidth=0, alpha=0.10, marker='.')
     kargs_cl = dict(s=50, linewidth=0, alpha=0.50, marker='.')
 
     # -----Visualization-----
@@ -64,11 +75,11 @@ def plot_clustered_data(table):
     plt.xlim(xmax, xmin)
 
     # plot a circle TODO:delete!
-    #theta = np.linspace(0, 2*np.pi, 100)
-    #r = 1./60. * 1.0 * 0.5
-    #x1 = r*np.cos(theta) + 341.1292
-    #x2 = r*np.sin(theta) - 0.3465
-    #plt.plot(x1, x2, color=(0, .7, 0))
+    # theta = np.linspace(0, 2*np.pi, 100)
+    # r = 1./60. * 1.0 * 0.5
+    # x1 = r*np.cos(theta) + 341.1292
+    # x2 = r*np.sin(theta) - 0.3465
+    # plt.plot(x1, x2, color=(0, .7, 0))
 
     # J-H vs H-Ks
     plt.subplot(232)
@@ -97,7 +108,6 @@ def plot_clustered_data(table):
     plt.ylim(ymax, ymin)
     plt.xlim(-1.05, 1.05)
 
-    """
     # proper motions
     plt.subplot(235)
     plt.scatter(noise['pmra'], noise['pmdec'], c=noise['color'], **kargs_noise)
@@ -115,33 +125,27 @@ def plot_clustered_data(table):
     for label in range(cluster_number - 1):
         mask = table['label'] == label
         legend = f'{label}: {sum(mask)}'
-        print(legend)
         parallax = table['plx'][mask]
-        print('minplx', np.min(parallax))
-        print('maxplx', np.max(parallax))
         # plt.hist(parallax, bins=np.arange(np.min(parallax), np.max(parallax) + bin_width, bin_width),
         #          label=legend, color=color_palette[label], **kwargs)
         plt.hist(parallax, bins=3,
                  label=legend, color=color_palette[label], **kwargs)
     plt.xlabel('VIRAC plx, mas', fontweight='bold')
     plt.legend(prop={'size': 10})
-    plt.show()
-    """
+    # plt.show()
 
-    filename_plot = path.join(dirconfig.test_knowncl, table.meta['cluster'] + '.png')
-    plt.savefig(filename_plot, format='png', overwrite=True)
+    # Write-out results
+    filename_plot = path.join(output_dir, table.meta['cluster'] + '.png')
+    plt.savefig(filename_plot, format='png', overwrite=False)
     plt.clf()
 
-    filename_table = path.join(dirconfig.test_knowncl, table.meta['cluster'] + '.fits')
-    table.write(filename_table, format='fits')
-
-    return True
+    filename_table = path.join(output_dir, table.meta['cluster'] + '.fits')
+    table.write(filename_table, format='fits', overwrite=False)
 
 
-def makeplotroi():
+def make_plot_roi():
     """
-    Make plot of the region of interest including all the known clusters
-    defined in data.objects
+    Make plot of the region of interest including all the known clusters defined in `apolo/data/objects`.
     :return:
     """
     plt.figure()

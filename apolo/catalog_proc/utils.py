@@ -51,7 +51,8 @@ def check_base_data_structure():
     print('Your base data path is:', dirconfig.base_data_path)
 
     # Check if all directories exist
-    base_dirs = (dirconfig.raw_data, dirconfig.proc_data, dirconfig.cross_data, dirconfig.test_data)
+    base_dirs = (dirconfig.raw_data, dirconfig.proc_data, dirconfig.cross_data,
+                 dirconfig.tests, dirconfig.test_knowncl)
 
     for folder in base_dirs:
         if not path.exists(folder):

@@ -16,7 +16,7 @@ This script summarize all the necessary steps to obtain final catalogs from the 
     9. VVV x combis x Gaia
    10. VVV x 2MASS
    11. VVV x 2MASS x combis
-   12. VVV x 2MASS x combis x Gaia Cleaning
+   12. VVV x 2MASS x combis x Gaia
 """
 
 # Preliminars ----------------------------------------------

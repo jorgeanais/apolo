@@ -23,8 +23,8 @@ The original idea for this code is not just that it serves as a tool for my work
 to have a record of the things that I have been trying, so it is not intended for public use.
  
 
-Structure
----------
+Module Structure
+----------------
 
 The module is divided in the following parts:
 
@@ -37,7 +37,59 @@ The module is divided in the following parts:
  
  4. `test_tools`: useful functions used to perform tests
 
-Also, some scripts that I used are included in `scripts` folder, so it's easier to keep track of what I've been doing so far.
+Also, some scripts that I used are included in `scripts` folder, so it's easier to keep track of what I've 
+been doing so far.
 
-How it works
+Folder Structure
+----------------
+
+Catalogs are created/saved in a folder structure for their posterior usage. The folder structure is
+defined in `data/dirconfig.py` file. 
+
+```
+DATA/
+├── cross
+│   ├── x_vvv-2mass
+│   ├── x_vvv-2mass-combis
+│   ├── x_vvv-2mass-combis-gaia
+│   ├── x_vvv-2mass-combis-gaia_cont
+│   ├── x_vvv-combis
+│   ├── x_vvv-combis-gaia
+│   ├── x_vvv-combis-gaia_cont
+│   ├── x_vvv-gaia
+│   └── x_vvv-gaia_cont
+├── proc
+│   ├── p_2mass
+│   ├── p_combis
+│   ├── p_gaia
+│   └── p_vvv
+├── raw
+│   ├── 2mass
+│   ├── combis
+│   ├── gaia
+│   └── vvv
+└── test
+    └── known_clusters
+
+```
+
+Installation
 ------------
+
+1. To install Apolo, move to the folder where the setup.py is and then just execute
+
+```
+pip install -e .
+```
+
+Usage
+-----
+
+In the `scripts` folder, there are some codes that demonstrate how use apolo:
+
+1. `script_proc.py`: It pre-process and match raw catalogs in order to be used by the clustering algorithm.
+2. `basic_clustering.py`: A simple example of clustering. All the parameters are set by hand.
+3. `test_known_clusters`: This script automatically perform our current methodology to a set of clusters in parallel.
+
+
+

@@ -11,7 +11,7 @@ base_data_path = '/home/jorge/Documents/DATA'
 raw_data = path.join(base_data_path, 'raw')
 proc_data = path.join(base_data_path, 'proc')
 cross_data = path.join(base_data_path, 'cross')
-test_data = path.join(base_data_path, 'test')
+tests = path.join(base_data_path, 'test')
 
 # Raw data directories
 raw_vvv = path.join(raw_data, 'vvv')
@@ -37,5 +37,5 @@ cross_vvv_2mass_combis_gaia = path.join(cross_data, 'x_vvv-2mass-combis-gaia')
 cross_vvv_2mass_combis_gaia_cont = path.join(cross_data, 'x_vvv-2mass-combis-gaia_cont')
 
 # Tests directories
-test_knowncl = path.join(test_data, 'known_clusters')
-test_knowncl_2mass = path.join(test_data, 'known_clusters_using_2mass')
+test_knowncl = path.join(tests, 'known_clusters')
+

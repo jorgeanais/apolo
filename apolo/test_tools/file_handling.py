@@ -1,34 +1,7 @@
 import glob
 from os import path
 from apolo.data import dirconfig, objects
-
-
-def which_tile(clusters, tiles):
-    """
-    This function return in which tile is a list-of or single StellarCluster object.
-    If a cluster is in more than one cluster, then it returns only the first one.
-    :param clusters: StellarCluster object
-    :param tiles: Tile object
-    :return: a list with the name (key) of the tiles
-    """
-
-    if type(clusters) is not list:
-        clusters = [clusters]
-
-    keys = []
-    for cluster in clusters:
-        check = False
-
-        for key, t in tiles.items():
-            if t.contains(cluster):
-                keys.append(t)
-                check = True
-                break
-
-        if not check:
-            keys.append(None)
-
-    return keys
+from apolo.test_tools.utils import which_tile
 
 
 def parse_catalogs(files):
