@@ -29,7 +29,7 @@ Module Structure
 The module is divided into the following parts:
 
  1. `catalog_proc`: this module contains tools to perform the pre-processing stage. The objective 
- of this stage is to get/transform raw catalogs into a set of new catalogs in a common
+ of this stage is to get, transform and combine raw catalogs into a set of new catalogs in a common
  format that can be used in the clustering stage. 
   
  2. `clustering`: this module has the tools to perform clustering itself.
