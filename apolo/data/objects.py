@@ -43,4 +43,4 @@ cl86 = StellarCluster('VVVCL086', (340.0008, -0.2931), 1.17)
 cl74 = StellarCluster('VVVCL074', (336.3737, 0.1941), 1.1)
 cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 
-known_clusters = {'m81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88}
+known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88}
