@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-
-from apolo.data import dirconfig
+from astropy import units as u
+from apolo.data import dirconfig, objects
 from apolo.data.objects import all_tiles, known_clusters
 from os import path
 
@@ -61,6 +61,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
         properties['MCS'] = table.meta['MCS']
         properties['MS'] = table.meta['MS']
         properties['CSM'] = table.meta['CSELMTD']
+
     else:
         superior_title += 'No metadata available'
 
@@ -69,8 +70,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     kargs_cl = dict(s=50, linewidth=0, alpha=0.50, marker='.')
 
     # -----Visualization-----
-    # plt.figure(1)
-    my_dpi = 150
+    my_dpi = 100
     plt.figure(figsize=(1920/my_dpi, 1080/my_dpi), dpi=my_dpi)
 
     for k, v in properties.items():
@@ -80,19 +80,24 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
 
     # l b
     plt.subplot(231)
-    plt.xlabel('l, deg', fontweight='bold')  # fontsize=10, fontweight='bold')
+    plt.xlabel('l, deg', fontweight='bold')
     plt.ylabel('b, deg', fontweight='bold')
     plt.scatter(noise['l'], noise['b'], c=noise['color'], **kargs_noise)
     plt.scatter(clust['l'], clust['b'], c=clust['color'], **kargs_cl)
     xmin, xmax = plt.xlim()
     plt.xlim(xmax, xmin)
 
-    # plot a circle TODO:delete!
-    # theta = np.linspace(0, 2*np.pi, 100)
-    # r = 1./60. * 1.0 * 0.5
-    # x1 = r*np.cos(theta) + 341.1292
-    # x2 = r*np.sin(theta) - 0.3465
-    # plt.plot(x1, x2, color=(0, .7, 0))
+    # plot circle
+    if table.meta['CLUSTER']:
+        cluster = objects.known_clusters[table.meta['CLUSTER']]
+        r = cluster.asize.to_value(unit=u.deg) / 2.
+        l_cluster = cluster.coord.l.to_value(unit=u.deg)
+        b_cluster = cluster.coord.b.to_value(unit=u.deg)
+
+        theta = np.linspace(0, 2*np.pi, 100)
+        x1 = r * np.cos(theta) + l_cluster
+        x2 = r * np.sin(theta) + b_cluster
+        plt.plot(x1, x2, color=(0, .7, 0))
 
     # J-H vs H-Ks
     plt.subplot(232)

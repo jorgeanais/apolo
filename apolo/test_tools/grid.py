@@ -25,6 +25,8 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
 
     results = Table(names=('mcs', 'ms', 'cluster_number', 'score'))
 
+    cluster_name = input_table.meta['CLUSTER']
+
     # TODO: do the grid computation in parallel
     for mcs, ms in grid_of_params:
         copy_table = input_table.copy()
@@ -37,11 +39,12 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
         n_cluster = len(np.unique(clusterer.labels_))
         if n_cluster > 2:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
+            r = [mcs, ms, n_cluster, score]
+            results.add_row(r)
         else:
             score = np.nan
 
-        r = [mcs, ms, n_cluster, score]
-        results.add_row(r)
+        print(cluster_name, mcs, ms, score)
 
     results.sort('score', reverse=True)
 
@@ -82,6 +85,8 @@ def perform_kounkel_grid_score(input_table, range_params=(5, 16), step=1, space_
             results.add_row(r)
         else:
             score = np.nan
+
+        print(param_value, score)
 
     results.sort('score', reverse=True)
 

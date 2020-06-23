@@ -21,14 +21,14 @@ clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
 tiles = which_tile(clusters, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: `Phot+PM` or `PhotOnly`
-space_param = 'PhotOnly'
+space_param = 'Phot+PM'
 
 # Select which set of parameter do you want to use. Check apolo/data/dirconfig to have a complete list. For example
 # - dirconfig.proc_vvv (only Javier photometry, do not include proper motions)
 # - dirconfig.cross_vvv_gaia (only Javier photometry but cleaned used gaia)
 # - dirconfig.cross_vvv_combis_gaia (This set includes Javier's photometry, pm from combis and cleaned using gaia)
 # - dirconfig.cross_vvv_2mass_combis_gaia (This set includes vvv extended with 2mass, pm and cleaned using gaia)
-data_dir = dirconfig.cross_vvv_gaia
+data_dir = dirconfig.cross_vvv_combis_gaia
 
 # This line setup the arguments for function clustering_routine
 models = [(cl, tile, space_param, data_dir) for cl, tile in zip(clusters, tiles)]
