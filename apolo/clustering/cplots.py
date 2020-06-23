@@ -80,8 +80,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
 
     # l b
     plt.subplot(231)
-    plt.xlabel('l, arcmin', fontweight='bold')  # fontsize=10, fontweight='bold')
-    plt.ylabel('b, arcmin', fontweight='bold')
+    plt.xlabel('l, deg', fontweight='bold')  # fontsize=10, fontweight='bold')
+    plt.ylabel('b, deg', fontweight='bold')
     plt.scatter(noise['l'], noise['b'], c=noise['color'], **kargs_noise)
     plt.scatter(clust['l'], clust['b'], c=clust['color'], **kargs_cl)
     xmin, xmax = plt.xlim()
