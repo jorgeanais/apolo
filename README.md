@@ -26,16 +26,17 @@ to have a record of the things that I have been trying, so it is not intended fo
 Module Structure
 ----------------
 
-The module is divided in the following parts:
+The module is divided into the following parts:
 
- 1. `catalog_proc`: this module performs the pre-processing of the catalogs,  including matching,
-  cleaning and feature extraction.
- 
- 2. `clustering`: this module has the tools to perform the clustering and setup data.
+ 1. `catalog_proc`: this module contains tools to perform the pre-processing stage. The objective 
+ of this stage is to get/transform raw catalogs into a set of new catalogs in a common
+ format that can be used in the clustering stage. 
+  
+ 2. `clustering`: this module has the tools to perform clustering itself.
  
  3. `data`: this module include data relevant to tiles in the region of interest and stellar cluster to do some test.
  
- 4. `test_tools`: useful functions used to perform tests
+ 4. `test_tools`: functions used to test different clustering approaches, before launch the search stage.
 
 
 Folder Structure

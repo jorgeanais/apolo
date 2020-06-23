@@ -5,10 +5,11 @@ from apolo.data import dirconfig, objects
 import multiprocessing as mp
 
 """
-This script shows how I perform a 'clustering', according to our current methodology, to a 
-set of know regions where I far-end-stellar-cluster is located.
-This is done in parallel, this mean one process for each stellar-cluster region.
-At the end you should find plots and files in your output folder for each stellar-cluster.
+This script shows how 'clustering' is performed according to our current methodology. 
+This is applied to a set of know regions centered in far-end-stellar-cluster location.
+This is done in parallel, this means, one process for each stellar-cluster region.
+This generate three files per cluster: an image (plots), a ecsv file (scores) and a
+fits table (with clustering results).
 """
 
 utils.check_base_data_structure()
@@ -29,7 +30,7 @@ space_param = 'Phot+PM'
 # - dirconfig.cross_vvv_2mass_combis_gaia (This set includes vvv extended with 2mass, pm and cleaned using gaia)
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
 
-# This line setup the arguments for function clustering routine
+# This line setup the arguments for function clustering_routine
 models = [(cl, tile, space_param, data_dir) for cl, tile in zip(clusters, tiles)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
