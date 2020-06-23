@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.table import Table
 from astropy.coordinates import SkyCoord, Galactic
+from datetime import datetime
 
 
 def remove_nanvalues_in_pm(table):
@@ -65,11 +66,17 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
     :return: an astropy-table with sources that lie in a neighborhood of the cluster
     """
     table = Table.read(input_catalog, format='fits')
-    metadata = {'origin': input_catalog,
-                'cluster': cluster.name,
-                'c_excess': c_excess,
-                'times': times}
-    table.meta = metadata
+
+    date_time = datetime.utcnow()
+    metadata = {'FILE': input_catalog,
+                'CLUSTER': cluster.name,
+                'CEXCESS': c_excess,
+                'TIMES': times,
+                'STAGE': 'setup_region',
+                'CDATE': date_time.strftime('%Y-%m-%d'),
+                'CTIME': date_time.strftime('%H:%M:%S')}
+
+    table.meta.update(metadata)
     table = remove_nanvalues_in_pm(table)
     table['Q'] = add_pseudocolor(table, color_excess=c_excess)
 
@@ -86,11 +93,16 @@ def setup_region_combi(input_catalog, cluster, c_excess=1.8, times=2.0):
     table.rename_column('mj-mk', 'J-Ks')
     table.rename_column('mj-mh', 'J-H')
 
-    metadata = {'origin': input_catalog,
-                'cluster': cluster.name,
-                'c_excess': c_excess,
-                'times': times}
-    table.meta = metadata
+    date_time = datetime.utcnow()
+    metadata = {'FILE': input_catalog,
+                'CLUSTER': cluster.name,
+                'CEXCESS': c_excess,
+                'TIMES': times,
+                'STAGE': 'setup_region_combi',
+                'CDATE': date_time.strftime('%Y-%m-%d'),
+                'CTIME': date_time.strftime('%H:%M:%S'),
+                }
+    table.meta.update(metadata)
     table = remove_nanvalues_in_pm(table)
     table['Q'] = add_pseudocolor(table, color_excess=c_excess)
 

@@ -40,8 +40,6 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
         else:
             score = np.nan
 
-        print(score)
-
         r = [mcs, ms, n_cluster, score]
         results.add_row(r)
 

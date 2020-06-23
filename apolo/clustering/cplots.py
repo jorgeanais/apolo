@@ -14,13 +14,26 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
       - J-H vs H-Ks
       - Ks vs J-Ks
       - Q vs Ks
-      - PM_dec vs PM_ra
-      - parallax histogram
+      - PM_dec vs PM_ra (if present)
+      - parallax histogram (if present)
 
     :param table: An astropy table produced by apolo.clustering.ctools.do_hdbscan() function.
     :param output_dir: string. Path to a dir where output are saved
     :return:
     """
+
+    # Check if those columns exist
+    cols_min = ('l', 'b', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H', 'Q')
+
+    if not all(_ in table.columns for _ in cols_min):
+        raise ValueError('Table does not contain all requested columns')
+
+    # Check if there are proper motions and parallax
+    proper_motions = True
+    cols_pm = ('pmra', 'pmdec', 'plx')
+    if not all(_ in table.columns for _ in cols_pm):
+        proper_motions = False
+
     table.sort('label')
     # filtro = table['mag_Ks'] < 15.0  #TODO: quitar!!!!
     # table = table[filtro]
@@ -41,13 +54,13 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     clust = table[table['label'] != -1]
 
     # Read metadata
-    metadata = {}
+    properties = {}
     superior_title = ''
-    if table.meta['cluster_algorithm'] == 'hdbscan':
-        superior_title += table.meta['cluster'] + '\n'
-        metadata['mcs'] = table.meta['min_cluster_size']
-        metadata['ms'] = table.meta['min_samples']
-        metadata['csm'] = table.meta['cluster_selection_method']
+    if table.meta['ALGORIT'] == 'hdbscan':
+        superior_title += table.meta['CLUSTER'] + '\n'
+        properties['MCS'] = table.meta['MCS']
+        properties['MS'] = table.meta['MS']
+        properties['CSM'] = table.meta['CSELMTD']
     else:
         superior_title += 'No metadata available'
 
@@ -58,9 +71,9 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     # -----Visualization-----
     # plt.figure(1)
     my_dpi = 150
-    plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+    plt.figure(figsize=(1920/my_dpi, 1080/my_dpi), dpi=my_dpi)
 
-    for k, v in metadata.items():
+    for k, v in properties.items():
         superior_title += k + '=' + str(v) + ' '
 
     plt.suptitle(superior_title, fontsize='large')
@@ -98,7 +111,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     plt.ylim(ymax, ymin)
 
     # Q vs Ks
-    ce = table.meta['c_excess']
+    ce = table.meta['CEXCESS']
     plt.subplot(234)
     plt.scatter(noise['Q'], noise['mag_Ks'], c=noise['color'], **kargs_noise)
     plt.scatter(clust['Q'], clust['mag_Ks'], c=clust['color'], **kargs_cl)
@@ -108,38 +121,41 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     plt.ylim(ymax, ymin)
     plt.xlim(-1.05, 1.05)
 
-    # proper motions
-    plt.subplot(235)
-    plt.scatter(noise['pmra'], noise['pmdec'], c=noise['color'], **kargs_noise)
-    plt.scatter(clust['pmra'], clust['pmdec'], c=clust['color'], **kargs_cl)
-    plt.xlabel('pmra, mas/yr', fontweight='bold')
-    plt.ylabel('pmdec, mas/yr', fontweight='bold')
+    if proper_motions:
+        # proper motions
+        plt.subplot(235)
+        plt.scatter(noise['pmra'], noise['pmdec'], c=noise['color'], **kargs_noise)
+        plt.scatter(clust['pmra'], clust['pmdec'], c=clust['color'], **kargs_cl)
+        plt.xlabel('pmra, mas/yr', fontweight='bold')
+        plt.ylabel('pmdec, mas/yr', fontweight='bold')
 
-    plt.xlim(-10.1, 6.1)
-    plt.ylim(-10.1, 6.1)
+        plt.xlim(-10.1, 6.1)
+        plt.ylim(-10.1, 6.1)
 
-    # parallax histogram
-    plt.subplot(236)
-    kwargs = dict(histtype='stepfilled', alpha=0.4, ec="k")
-    bin_width = 1.
-    for label in range(cluster_number - 1):
-        mask = table['label'] == label
-        legend = f'{label}: {sum(mask)}'
-        parallax = table['plx'][mask]
-        # plt.hist(parallax, bins=np.arange(np.min(parallax), np.max(parallax) + bin_width, bin_width),
-        #          label=legend, color=color_palette[label], **kwargs)
-        plt.hist(parallax, bins=3,
-                 label=legend, color=color_palette[label], **kwargs)
-    plt.xlabel('VIRAC plx, mas', fontweight='bold')
-    plt.legend(prop={'size': 10})
+        # parallax histogram
+        plt.subplot(236)
+        kwargs = dict(histtype='stepfilled', alpha=0.4, ec="k")
+        # bin_width = 1.
+        for label in range(cluster_number - 1):
+            mask = table['label'] == label
+            legend = f'{label}: {sum(mask)}'
+            parallax = table['plx'][mask]
+            # plt.hist(parallax, bins=np.arange(np.min(parallax), np.max(parallax) + bin_width, bin_width),
+            #          label=legend, color=color_palette[label], **kwargs)
+            plt.hist(parallax, bins=3,
+                     label=legend, color=color_palette[label], **kwargs)
+        plt.xlabel('VIRAC plx, mas', fontweight='bold')
+        plt.legend(prop={'size': 10})
+
     # plt.show()
 
-    # Write-out results
-    filename_plot = path.join(output_dir, table.meta['cluster'] + '.png')
+    # Save plot as .png image
+    filename_plot = path.join(output_dir, table.meta['CLUSTER'] + '.png')
     plt.savefig(filename_plot, format='png', overwrite=False)
     plt.clf()
 
-    filename_table = path.join(output_dir, table.meta['cluster'] + '.fits')
+    # Save table as fits
+    filename_table = path.join(output_dir, table.meta['CLUSTER'] + '.fits')
     table.write(filename_table, format='fits', overwrite=False)
 
 

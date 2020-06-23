@@ -1,5 +1,6 @@
 import hdbscan
 import numpy as np
+from datetime import datetime
 
 """
 This module contains some custom tools for clustering
@@ -97,13 +98,19 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     # Add labels, probabilities and meta data to the table
     table['label'] = clusterer.labels_
     table['probabilities'] = clusterer.probabilities_
-    metadata = {'space_param': space_param,
-                'cols': cols,
-                'cluster_algorithm': 'hdbscan',
-                'n_cluster': cluster_number,
-                'min_cluster_size': kargs['min_cluster_size'],
-                'min_samples': kargs['min_samples'],
-                'cluster_selection_method': kargs['cluster_selection_method']}
+
+    date_time = datetime.utcnow()
+    metadata = {'STAGE': 'do_hdbscan',
+                'SPARAMS': space_param,
+                'COLS': cols,
+                'ALGORIT': 'hdbscan',
+                'NCLUST': cluster_number,
+                'MCS': kargs['min_cluster_size'],
+                'MS': kargs['min_samples'],
+                'CSELMTD': kargs['cluster_selection_method'],
+                'CDATE': date_time.strftime('%Y-%m-%d'),
+                'CTIME': date_time.strftime('%H:%M:%S')}
+
     table.meta.update(metadata)
 
     return data, clusterer

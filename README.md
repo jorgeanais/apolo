@@ -34,7 +34,7 @@ The module is divided into the following parts:
   
  2. `clustering`: this module has the tools to perform clustering itself.
  
- 3. `data`: this module include data relevant to tiles in the region of interest and stellar cluster.
+ 3. `data`: this module include data relevant to tiles in the region of interest and stellar clusters.
  
  4. `test_tools`: functions used to test different clustering approaches, before launch the search stage.
 
