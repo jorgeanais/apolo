@@ -3,7 +3,7 @@ Apolo
 
 > Status: In development 
 
-This code was made as part of my master thesis in Astronomy. The idea is
+This code is being developed as part of my master thesis in Astronomy. The idea is
 to develop an algorithm to find stellar-clusters, focusing in the region of
 the far end of the Milky Way.
 
