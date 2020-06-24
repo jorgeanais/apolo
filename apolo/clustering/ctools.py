@@ -83,17 +83,22 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     if not kargs['cluster_selection_method']:
         kargs['cluster_selection_method'] = 'leaf'
 
+    # Print cluster name if exists
+    cluster_name = ''
+    if table.meta['CLUSTER']:
+        cluster_name = table.meta['CLUSTER']
+
     # Print HDBSCAN* parameters
-    # mcs = kargs['min_cluster_size']
-    # ms = kargs['min_samples']
-    # csm = kargs['cluster_selection_method']
-    # print(f'MCS: {mcs}  MS:{ms}  CSM:{csm}')
+    mcs = kargs['min_cluster_size']
+    ms = kargs['min_samples']
+    csm = kargs['cluster_selection_method']
+    print(f'{cluster_name} MCS: {mcs}  MS:{ms}  CSM:{csm}')
 
     # Clustering is done here
     clusterer = hdbscan.HDBSCAN(**kargs).fit(data)
 
-    cluster_number = len(np.unique(clusterer.labels_))
-    # f'Number of clusters identified: {cluster_number}'
+    n_clusters = len(np.unique(clusterer.labels_))
+    # f'Number of clusters identified: {n_cluster}'
 
     # Add labels, probabilities and meta data to the table
     table['label'] = clusterer.labels_
@@ -104,7 +109,7 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
                 'SPARAMS': space_param,
                 'COLS': cols,
                 'ALGORIT': 'hdbscan',
-                'NCLUST': cluster_number,
+                'NCLUST': n_clusters,
                 'MCS': kargs['min_cluster_size'],
                 'MS': kargs['min_samples'],
                 'CSELMTD': kargs['cluster_selection_method'],

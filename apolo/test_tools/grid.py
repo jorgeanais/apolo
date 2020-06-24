@@ -23,11 +23,8 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
     r_min_samples = np.arange(ms_min, ms_max, step)
     grid_of_params = ((mcs, ms) for mcs in r_min_cluster_size for ms in r_min_samples)
 
-    results = Table(names=('mcs', 'ms', 'cluster_number', 'score'))
+    results = Table(names=('mcs', 'ms', 'n_clusters', 'score'))
 
-    cluster_name = input_table.meta['CLUSTER']
-
-    # TODO: do the grid computation in parallel
     for mcs, ms in grid_of_params:
         copy_table = input_table.copy()
         data, clusterer = ctools.do_hdbscan(copy_table, space_param=space_param,
@@ -37,14 +34,12 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
                                             cluster_selection_method=cluster_selection_method)
 
         n_cluster = len(np.unique(clusterer.labels_))
-        if n_cluster > 2:
+        if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
             r = [mcs, ms, n_cluster, score]
             results.add_row(r)
         else:
             score = np.nan
-
-        print(cluster_name, mcs, ms, score)
 
     results.sort('score', reverse=True)
 
@@ -67,7 +62,7 @@ def perform_kounkel_grid_score(input_table, range_params=(5, 16), step=1, space_
     # Make a grid of parameters
     grid_of_params = np.arange(pmin, pmax, step)
 
-    results = Table(names=('mcs', 'ms', 'cluster_number', 'score'))
+    results = Table(names=('mcs', 'ms', 'n_clusters', 'score'))
 
     # TODO: do the grid computation in parallel
     for param_value in grid_of_params:
@@ -79,7 +74,7 @@ def perform_kounkel_grid_score(input_table, range_params=(5, 16), step=1, space_
                                             cluster_selection_method=cluster_selection_method)
 
         n_cluster = len(np.unique(clusterer.labels_))
-        if n_cluster > 2:
+        if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
             r = [param_value, param_value, n_cluster, score]
             results.add_row(r)

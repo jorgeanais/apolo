@@ -3,6 +3,8 @@ from apolo.test_tools.routines import clustering_routine
 from apolo.test_tools.utils import which_tile
 from apolo.data import dirconfig, objects
 import multiprocessing as mp
+from os import path
+from apolo.catalog_proc.utils import make_dir
 
 """
 This script shows how 'clustering' is performed according to our current methodology. 
@@ -29,9 +31,27 @@ space_param = 'Phot+PM'
 # - dirconfig.cross_vvv_combis_gaia (This set includes Javier's photometry, pm from combis and cleaned using gaia)
 # - dirconfig.cross_vvv_2mass_combis_gaia (This set includes vvv extended with 2mass, pm and cleaned using gaia)
 data_dir = dirconfig.cross_vvv_combis_gaia
+out_dir = path.join(dirconfig.test_knowncl, 'vvv_combis_gaia/')
+make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir) for cl, tile in zip(clusters, tiles)]
+models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
+
+# Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
+# and passing the arguments `models`,
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    results = pool.starmap(clustering_routine, models)
+
+
+# -----------
+# VVV 2MASS COMBIS GAIA
+
+data_dir = dirconfig.cross_vvv_2mass_combis_gaia
+out_dir = path.join(dirconfig.test_knowncl, 'vvv_c2mass_ombis_gaia/')
+make_dir(out_dir)
+
+# This line setup the arguments for function clustering_routine
+models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
 # and passing the arguments `models`,

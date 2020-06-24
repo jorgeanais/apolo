@@ -61,6 +61,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
         properties['MCS'] = table.meta['MCS']
         properties['MS'] = table.meta['MS']
         properties['CSM'] = table.meta['CSELMTD']
+        properties['FILE'] = path.basename(table.meta['FILE'])
 
     else:
         superior_title += 'No metadata available'
@@ -105,6 +106,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     plt.scatter(clust['H-Ks'], clust['J-H'], c=clust['color'], **kargs_cl)
     plt.xlabel('(H - Ks), mag', fontweight='bold')
     plt.ylabel('(J - H), mag', fontweight='bold')
+    plt.xlim(-0.5, 2.5)
+    plt.ylim(0.3, 4.5)
 
     # Ks vs J-Ks
     plt.subplot(233)
@@ -114,6 +117,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     plt.ylabel('Ks, mag', fontweight='bold')
     ymin, ymax = plt.ylim()
     plt.ylim(ymax, ymin)
+    plt.xlim(0.0, 6.0)
+    plt.ylim(18, 8)
 
     # Q vs Ks
     ce = table.meta['CEXCESS']
@@ -125,6 +130,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     ymin, ymax = plt.ylim()
     plt.ylim(ymax, ymin)
     plt.xlim(-1.05, 1.05)
+    plt.ylim(18, 8)
 
     if proper_motions:
         # proper motions
@@ -133,7 +139,6 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
         plt.scatter(clust['pmra'], clust['pmdec'], c=clust['color'], **kargs_cl)
         plt.xlabel('pmra, mas/yr', fontweight='bold')
         plt.ylabel('pmdec, mas/yr', fontweight='bold')
-
         plt.xlim(-10.1, 6.1)
         plt.ylim(-10.1, 6.1)
 
