@@ -77,7 +77,7 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
                 'CTIME': date_time.strftime('%H:%M:%S')}
 
     table.meta.update(metadata)
-    table = remove_nanvalues_in_pm(table)
+    # table = remove_nanvalues_in_pm(table)
     table['Q'] = add_pseudocolor(table, color_excess=c_excess)
 
     return spatial_cut(table, cluster.coord, times * cluster.asize)
