@@ -180,3 +180,39 @@ utils.make_dir(dirconfig.cross_vvv_2mass_combis_gaia, dirconfig.cross_vvv_2mass_
 
 with mp.Pool(n_processes) as pool:
     pool.starmap(crossproc.gaia_cleaning, args_vvv_2mass_combis_gaia)
+
+# Step 13 -----------------------------------------------------------------------------------------------------------
+# Added later, preproc combi catalogs but removing all sources with missing values in pm and jhk-bands
+
+files_combis = glob.glob(dirconfig.raw_combis + '/*.csv')
+
+args_combis_complete = ((file, dirconfig.proc_combis_complete, True) for file in files_combis)
+
+utils.make_dir(dirconfig.proc_combis_complete)
+
+with mp.Pool(n_processes) as pool:
+    pool.starmap(preproc.process_combis_csv, args_combis_complete)
+
+# Step 14 -----------------------------------------------------------------------------------------------------------
+# gaia cleaning to combis complete catalogs
+
+arg_combis_complete_gaia = utils.get_func_args_iterator(objects.tiles_in_roi,
+                                                        dirconfig.proc_combis_complete,
+                                                        dirconfig.proc_gaia,
+                                                        dirconfig.cross_combis_complete_gaia,
+                                                        dirconfig.cross_combis_complete_gaia_cont)
+
+utils.make_dir(dirconfig.cross_combis_complete_gaia, dirconfig.cross_combis_complete_gaia_cont)
+
+with mp.Pool(n_processes) as pool:
+    pool.starmap(crossproc.gaia_cleaning, arg_combis_complete_gaia)
+
+# Step 14 -----------------------------------------------------------------------------------------------------------
+# Rename columns
+
+files_combis_gaia = glob.glob(dirconfig.cross_combis_complete_gaia + '/*.fits')
+
+utils.make_dir(dirconfig.cross_combis_complete_gaia_colnames_fixed)
+
+with mp.Pool(n_processes) as pool:
+    pool.map(preproc.rename_combis_columns, files_combis_gaia)

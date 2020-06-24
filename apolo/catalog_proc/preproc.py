@@ -208,11 +208,12 @@ def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
     table[match].write(out_path, format='fits')
 
 
-def process_combis_csv(input_file, out_dir=dirconfig.proc_combis):
+def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, phot_complete=False):
     """
     This function simply transform combis catalogs (with proper motions) from a csv file
     to a fits file.
 
+    :param phot_complete: Consider only data with complete photometrical information in bands mj, mh and mk
     :param input_file: String. Path to the combi catalog (*.csv file)
     :param out_dir: String. Output directory
     :return:
@@ -241,6 +242,9 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis):
 
     # Create colors
     mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec'])
+    if phot_complete:
+        mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec']) \
+               * ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk'])
 
     aux = table[mask]
     aux['mh-mk'] = aux['mh'] - aux['mk']
@@ -258,3 +262,22 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis):
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
     aux.write(out, format='fits')
+
+
+def rename_combis_columns(input_file, out_dir=dirconfig.cross_combis_complete_gaia_colnames_fixed):
+    # Check if files exist
+    if files_exist(input_file):
+        print(f'Processing file {input_file}')
+
+    table = Table.read(input_file, format='fits')
+
+    original_col_names = ('mj', 'mh', 'mk', 'mh-mk', 'mj-mk', 'mj-mh')
+    vvvlike_col_names = ('mag_J', 'mag_H', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H')
+
+    for original_col_name, vvvlike_col_name in zip(original_col_names, vvvlike_col_names):
+        table.rename_column(original_col_name, vvvlike_col_name)
+
+    filename = path.basename(input_file)
+    out_file = path.join(out_dir, filename.replace('.fits', 'colnames_fix.fits'))
+
+    table.write(out_file, format='fits')

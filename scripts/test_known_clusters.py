@@ -47,7 +47,7 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
 # VVV 2MASS COMBIS GAIA
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'vvv_c2mass_ombis_gaia/')
+out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia/')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
@@ -57,3 +57,19 @@ models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(cluster
 # and passing the arguments `models`,
 with mp.Pool(mp.cpu_count() - 1) as pool:
     results = pool.starmap(clustering_routine, models)
+
+# -----------
+# COMBIS GAIA
+
+data_dir = dirconfig.cross_combis_complete_gaia_colnames_fixed
+out_dir = path.join(dirconfig.test_knowncl, 'combis_gaia/')
+make_dir(out_dir)
+
+# This line setup the arguments for function clustering_routine
+models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
+
+# Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
+# and passing the arguments `models`,
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    results = pool.starmap(clustering_routine, models)
+
