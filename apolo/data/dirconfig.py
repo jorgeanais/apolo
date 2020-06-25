@@ -24,7 +24,7 @@ proc_vvv = path.join(proc_data, 'p_vvv')
 proc_gaia = path.join(proc_data, 'p_gaia')
 proc_2mass = path.join(proc_data, 'p_2mass')
 proc_combis = path.join(proc_data, 'p_combis')
-proc_combis_complete = path.join(proc_data, 'p_combis_complete')
+proc_combisphot = path.join(proc_data, 'p_combisphot')
 
 # Catalog crossover
 cross_vvv_gaia = path.join(cross_data, 'x_vvv-gaia')
@@ -36,9 +36,8 @@ cross_vvv_2mass = path.join(cross_data, 'x_vvv-2mass')
 cross_vvv_2mass_combis = path.join(cross_data, 'x_vvv-2mass-combis')
 cross_vvv_2mass_combis_gaia = path.join(cross_data, 'x_vvv-2mass-combis-gaia')
 cross_vvv_2mass_combis_gaia_cont = path.join(cross_data, 'x_vvv-2mass-combis-gaia_cont')
-cross_combis_complete_gaia = path.join(cross_data, 'x_combiscomplete-gaia')
-cross_combis_complete_gaia_cont = path.join(cross_data, 'x_combiscomplete-gaia_cont')
-cross_combis_complete_gaia_colnames_fixed = path.join(cross_data, 'x_combiscomplete-gaia_colnames')
+cross_combisphot_gaia = path.join(cross_data, 'x_combisphot-gaia')
+cross_combisphot_gaia_cont = path.join(cross_data, 'x_combisphot-gaia_cont')
 
 
 # Tests directories

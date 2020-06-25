@@ -17,6 +17,8 @@ This script summarize all the necessary steps to obtain final catalogs from the 
    10. VVV x 2MASS
    11. VVV x 2MASS x combis
    12. VVV x 2MASS x combis x Gaia
+   13. Combisphot
+   14. Combisphot x Gaia
 """
 
 # Preliminars ----------------------------------------------
@@ -182,37 +184,35 @@ with mp.Pool(n_processes) as pool:
     pool.starmap(crossproc.gaia_cleaning, args_vvv_2mass_combis_gaia)
 
 # Step 13 -----------------------------------------------------------------------------------------------------------
-# Added later, preproc combi catalogs but removing all sources with missing values in pm and jhk-bands
+# Combisphot
+# Proc combi catalogs but removing all sources with pm & jhk-bands missing values
+# Third argument in process_combis_csv equals True indicate combiphot (combis*)
 
-files_combis = glob.glob(dirconfig.raw_combis + '/*.csv')
+files_combisphot = glob.glob(dirconfig.raw_combis + '/*.csv')
+utils.make_dir(dirconfig.proc_combisphot)
+args_combisphot = ((file, dirconfig.proc_combisphot, True) for file in files_combisphot)
 
-args_combis_complete = ((file, dirconfig.proc_combis_complete, True) for file in files_combis)
-
-utils.make_dir(dirconfig.proc_combis_complete)
-
-with mp.Pool(n_processes) as pool:
-    pool.starmap(preproc.process_combis_csv, args_combis_complete)
-
-# Step 14 -----------------------------------------------------------------------------------------------------------
-# gaia cleaning to combis complete catalogs
-
-arg_combis_complete_gaia = utils.get_func_args_iterator(objects.tiles_in_roi,
-                                                        dirconfig.proc_combis_complete,
-                                                        dirconfig.proc_gaia,
-                                                        dirconfig.cross_combis_complete_gaia,
-                                                        dirconfig.cross_combis_complete_gaia_cont)
-
-utils.make_dir(dirconfig.cross_combis_complete_gaia, dirconfig.cross_combis_complete_gaia_cont)
-
-with mp.Pool(n_processes) as pool:
-    pool.starmap(crossproc.gaia_cleaning, arg_combis_complete_gaia)
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    pool.starmap(preproc.process_combis_csv, args_combisphot)
 
 # Step 14 -----------------------------------------------------------------------------------------------------------
-# Rename columns
+# gaia cleaning combisphot
 
-files_combis_gaia = glob.glob(dirconfig.cross_combis_complete_gaia + '/*.fits')
+arg_combisphot_gaia = utils.get_func_args_iterator(objects.tiles_in_roi,
+                                                   dirconfig.proc_combisphot,
+                                                   dirconfig.proc_gaia,
+                                                   dirconfig.cross_combisphot_gaia,
+                                                   dirconfig.cross_combisphot_gaia_cont)
 
-utils.make_dir(dirconfig.cross_combis_complete_gaia_colnames_fixed)
+utils.make_dir(dirconfig.cross_combisphot_gaia, dirconfig.cross_combisphot_gaia_cont)
 
-with mp.Pool(n_processes) as pool:
-    pool.map(preproc.rename_combis_columns, files_combis_gaia)
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    pool.starmap(crossproc.gaia_cleaning, arg_combisphot_gaia)
+
+# Rename columns (re-write old files)
+files_combisphot_gaia = glob.glob(dirconfig.cross_combisphot_gaia + '/*.fits')
+
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    pool.map(preproc.rename_combis_columns, files_combisphot_gaia)
+
+

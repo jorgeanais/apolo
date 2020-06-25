@@ -208,12 +208,12 @@ def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
     table[match].write(out_path, format='fits')
 
 
-def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, phot_complete=False):
+def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=False):
     """
     This function simply transform combis catalogs (with proper motions) from a csv file
     to a fits file.
 
-    :param phot_complete: Consider only data with complete photometrical information in bands mj, mh and mk
+    :param combis_phot: Consider only data with complete photometrical information in bands mj, mh and mk
     :param input_file: String. Path to the combi catalog (*.csv file)
     :param out_dir: String. Output directory
     :return:
@@ -242,9 +242,8 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, phot_complete=
 
     # Create colors
     mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec'])
-    if phot_complete:
-        mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec']) \
-               * ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk'])
+    if combis_phot:
+        mask *= ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk'])
 
     aux = table[mask]
     aux['mh-mk'] = aux['mh'] - aux['mk']
@@ -264,7 +263,16 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, phot_complete=
     aux.write(out, format='fits')
 
 
-def rename_combis_columns(input_file, out_dir=dirconfig.cross_combis_complete_gaia_colnames_fixed):
+def rename_combis_columns(input_file, out_dir=dirconfig.cross_combisphot_gaia):
+    """
+    This function renames columns mj mh mk and their respective colors with VVV-like names.
+    It overwrite original files if out_dir param is leave as default, so be careful!
+
+    :param input_file: String. Path to the file
+    :param out_dir: Output directory.
+    :return:
+    """
+
     # Check if files exist
     if files_exist(input_file):
         print(f'Processing file {input_file}')
@@ -274,10 +282,15 @@ def rename_combis_columns(input_file, out_dir=dirconfig.cross_combis_complete_ga
     original_col_names = ('mj', 'mh', 'mk', 'mh-mk', 'mj-mk', 'mj-mh')
     vvvlike_col_names = ('mag_J', 'mag_H', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H')
 
+    # Check if columns exist
+    if not all(_ in table.columns for _ in original_col_names):
+        raise KeyError(f'Table does not contain all expected columns: {original_col_names}')
+
+    # Rename columns
     for original_col_name, vvvlike_col_name in zip(original_col_names, vvvlike_col_names):
         table.rename_column(original_col_name, vvvlike_col_name)
 
-    filename = path.basename(input_file)
-    out_file = path.join(out_dir, filename.replace('.fits', 'colnames_fix.fits'))
+    meta = {'STAGE': 'rename_combis_columns'}
+    table.meta.update()
 
-    table.write(out_file, format='fits')
+    table.write(input_file, format='fits', overwrite=True)
