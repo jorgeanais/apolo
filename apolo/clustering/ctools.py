@@ -87,7 +87,7 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
 
     # Print cluster name if exists
     cluster_name = ''
-    if table.meta['CLUSTER']:
+    if 'CLUSTER' in table.meta:
         cluster_name = table.meta['CLUSTER']
 
     # Print HDBSCAN* parameters
