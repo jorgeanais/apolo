@@ -24,8 +24,8 @@ def clustering_routine(cluster, tile, space_param='Phot+PM', data_dir=dirconfig.
     catalog_file = tile.get_file(data_dir)
     region = setup_region(catalog_file, cluster, times=4.0)
     scores = perform_grid_score(region,
-                                mcs_range=(5, 80),
-                                ms_range=(5, 80),
+                                mcs_range=(5, 100),
+                                ms_range=(5, 100),
                                 space_param=space_param,
                                 cluster_selection_method='leaf')
     score_filepath = path.join(out_dir, 'score_' + cluster.name + '.ecsv')

@@ -11,8 +11,7 @@ Our approach consist in apply unsupervised machine learning techniques in a larg
 data-set of near-infrared photometry from VVV project (Saito et al. 2012). 
 This data is specially suitable for this kind
 of search due to range of wavelengths are less affected by interstellar extinction.
-The PSF photometry catalogs came from the work by Alonso-García et al. 2018. Unfortunately,
-this data is not publicly available at the present time. 
+The PSF photometry catalogs came from the work by Alonso-García et al. 2018.
 
 We complement this photometric 
 catalog with proper-motions from VIRAC (Smith et. al 2018) and 
@@ -75,7 +74,9 @@ DATA/
 Installation
 ------------
 
-1. First, you need to modify where base data directory is. To do that, edit the file `apolo/data/dirconfig.py` in line 8.
+1. First, download the code
+ 
+2. Then, edit file `apolo/data/dirconfig.py` in line 8 to indicate where your base directory is.
 ```
 ...
 # Base path definition

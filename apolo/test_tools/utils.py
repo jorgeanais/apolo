@@ -30,6 +30,7 @@ def add_pseudocolor(table, color_excess=1.8):
     :return: astropytable column
     """
 
+    table.meta.update({'CEXCESS': color_excess})
     return table['J-H'] - color_excess * table['H-Ks']
 
 
@@ -70,7 +71,6 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
     date_time = datetime.utcnow()
     metadata = {'FILE': input_catalog,
                 'CLUSTER': cluster.name,
-                'CEXCESS': c_excess,
                 'TIMES': times,
                 'STAGE': 'setup_region',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
@@ -83,9 +83,8 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
     return spatial_cut(table, cluster.coord, times * cluster.asize)
 
 
-def setup_region_combi(input_catalog, cluster, c_excess=1.8, times=2.0):
+def rename_combis_columns(table):
 
-    table = Table.read(input_catalog, format='fits')
     table.rename_column('mj', 'mag_J')
     table.rename_column('mh', 'mag_H')
     table.rename_column('mk', 'mag_Ks')
@@ -93,10 +92,15 @@ def setup_region_combi(input_catalog, cluster, c_excess=1.8, times=2.0):
     table.rename_column('mj-mk', 'J-Ks')
     table.rename_column('mj-mh', 'J-H')
 
+
+def setup_region_combi(input_catalog, cluster, c_excess=1.8, times=2.0):
+
+    table = Table.read(input_catalog, format='fits')
+    rename_combis_columns(table)
+
     date_time = datetime.utcnow()
     metadata = {'FILE': input_catalog,
                 'CLUSTER': cluster.name,
-                'CEXCESS': c_excess,
                 'TIMES': times,
                 'STAGE': 'setup_region_combi',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
