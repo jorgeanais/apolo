@@ -5,6 +5,7 @@ from astropy import units as u
 from apolo.data import dirconfig, objects
 from apolo.data.objects import all_tiles, known_clusters
 from os import path
+import time
 
 
 def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
@@ -56,13 +57,19 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     # Read metadata
     properties = {}
     superior_title = ''
+    object_name = ''
+
+    if 'CLUSTER' in table.meta:
+        object_name = table.meta['CLUSTER']
+    elif 'OBJECT' in table.meta:
+        object_name = table.meta['OBJECT']
+
     if table.meta['ALGORIT'] == 'hdbscan':
-        superior_title += table.meta['CLUSTER'] + '\n'
+        superior_title += object_name + '\n'
         properties['MCS'] = table.meta['MCS']
         properties['MS'] = table.meta['MS']
         properties['CSM'] = table.meta['CSELMTD']
         properties['FILE'] = path.basename(table.meta['FILE'])
-
     else:
         superior_title += 'No metadata available'
 
@@ -89,7 +96,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     plt.xlim(xmax, xmin)
 
     # plot circle
-    if table.meta['CLUSTER']:
+    if 'CLUSTER' in table.meta:
         cluster = objects.known_clusters[table.meta['CLUSTER']]
         r = cluster.asize.to_value(unit=u.deg) / 2.
         l_cluster = cluster.coord.l.to_value(unit=u.deg)
@@ -157,15 +164,19 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
         plt.xlabel('VIRAC plx, mas', fontweight='bold')
         plt.legend(prop={'size': 10})
 
-    # plt.show()
+    # Create filename based on object-name or time if not provided
+    if object_name:
+        filename_base = object_name
+    else:
+        filename_base = str(time.time())
 
     # Save plot as .png image
-    filename_plot = path.join(output_dir, table.meta['CLUSTER'] + '.png')
+    filename_plot = path.join(output_dir, filename_base + '.png')
     plt.savefig(filename_plot, format='png', overwrite=False)
     plt.clf()
 
     # Save table as fits
-    filename_table = path.join(output_dir, table.meta['CLUSTER'] + '.fits')
+    filename_table = path.join(output_dir, filename_base + '.fits')
     table.write(filename_table, format='fits', overwrite=False)
 
 

@@ -89,6 +89,8 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     cluster_name = ''
     if 'CLUSTER' in table.meta:
         cluster_name = table.meta['CLUSTER']
+    elif 'OBJECT' in table.meta:
+        cluster_name = table.meta['OBJECT']
 
     # Print HDBSCAN* parameters
     mcs = kargs['min_cluster_size']
