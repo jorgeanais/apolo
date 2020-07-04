@@ -64,12 +64,15 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     elif 'OBJECT' in table.meta:
         object_name = table.meta['OBJECT']
 
-    if table.meta['ALGORIT'] == 'hdbscan':
-        superior_title += object_name + '\n'
-        properties['MCS'] = table.meta['MCS']
-        properties['MS'] = table.meta['MS']
-        properties['CSM'] = table.meta['CSELMTD']
-        properties['FILE'] = path.basename(table.meta['FILE'])
+    if 'ALGORIT' in table.meta:
+        if table.meta['ALGORIT'] == 'hdbscan':
+            superior_title += object_name + '\n'
+            properties['MCS'] = table.meta['MCS']
+            properties['MS'] = table.meta['MS']
+            properties['CSM'] = table.meta['CSELMTD']
+            properties['FILE'] = path.basename(table.meta['FILE'])
+        else:
+            superior_title += 'No metadata available'
     else:
         superior_title += 'No metadata available'
 
@@ -159,8 +162,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
             parallax = table['plx'][mask]
             # plt.hist(parallax, bins=np.arange(np.min(parallax), np.max(parallax) + bin_width, bin_width),
             #          label=legend, color=color_palette[label], **kwargs)
-            plt.hist(parallax, bins=3,
-                     label=legend, color=color_palette[label], **kwargs)
+            plt.hist(parallax, bins=3, label=legend, color=color_palette[label], **kwargs)
         plt.xlabel('VIRAC plx, mas', fontweight='bold')
         plt.legend(prop={'size': 10})
 
