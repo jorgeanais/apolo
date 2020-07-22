@@ -22,7 +22,7 @@ def clustering_routine(cluster, tile, space_param='Phot+PM', data_dir=dirconfig.
 
     print(cluster, tile)
     catalog_file = tile.get_file(data_dir)
-    region = setup_region(catalog_file, cluster, times=4.0)
+    region = setup_region(catalog_file, cluster, times=2.0)
     scores = perform_grid_score(region,
                                 mcs_range=(5, 100),
                                 ms_range=(5, 100),

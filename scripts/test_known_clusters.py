@@ -17,7 +17,7 @@ fits table (with clustering results).
 utils.check_base_data_structure()
 
 # First, define a list of cluster. If you want to add a new cluster object,
-# you can do it in apolo/data/object.py. Then, which tile function will
+# you can do it in apolo/data/object.py. Then, which_tile() will
 # search their corresponding tile automatically.
 clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
 tiles = which_tile(clusters, objects.all_tiles)
@@ -71,6 +71,6 @@ make_dir(out_dir)
 models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
-# and passing the arguments `models`,
+# and passing the arguments `models`
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(clustering_routine, models)

@@ -36,12 +36,12 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
         n_cluster = len(np.unique(clusterer.labels_))
         if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
-            r = [mcs, ms, n_cluster, score]
+            r = [ms, mcs, n_cluster, score]
             results.add_row(r)
         else:
             score = np.nan
 
-    results.sort('score', reverse=True)
+    results.sort(['score', 'ms', 'mcs'], reverse=True)
 
     return results
 
@@ -86,3 +86,50 @@ def perform_kounkel_grid_score(input_table, range_params=(5, 16), step=1, space_
     results.sort('score', reverse=True)
 
     return results
+
+
+def score_degeneracy_summary(score_file):
+    """
+    This function produces a summary (table) of the Silhouette score degeneracy, indicating
+    ms and mcs ranges for a single score value.
+    Parameters
+    ----------
+    score_file: str, path to a ecsv file with the scores
+
+    Returns
+    -------
+    Astropy table with the summary
+
+    """
+
+    score_table = Table.read(score_file)
+    score_table.sort(['score', 'ms', 'mcs'], reverse=True)
+
+    table_len = len(score_table)
+    unique_score_values, count_unique_score_values = np.unique(score_table['score'], return_counts=True)
+    unique_score_values = unique_score_values[::-1]
+    count_unique_score_values = count_unique_score_values[::-1]
+
+    degeneracy_table = Table(names=('score', 'ms', 'mcs_start', 'mcs_end', 'n_clusters'))
+    row = []
+    index_score_start = 0
+    for score, count_score in zip(unique_score_values, count_unique_score_values):
+        index_score_end = index_score_start + count_score
+        unique_ms_values, count_unique_ms_values = np.unique(score_table['ms'][index_score_start:index_score_end],
+                                                             return_counts=True)
+        unique_ms_values = unique_ms_values[::-1]
+        count_unique_ms_values = count_unique_ms_values[::-1]
+
+        index_ms_start = index_score_start
+        for ms, count_ms in zip(unique_ms_values, count_unique_ms_values):
+            index_ms_end = index_ms_start + count_ms
+            unique_mcs_values = np.unique(score_table['mcs'][index_ms_start:index_ms_end])
+            n_clusters = score_table['n_clusters'][index_ms_start]
+
+            row = [score, ms, unique_mcs_values[0], unique_mcs_values[-1], n_clusters]
+            degeneracy_table.add_row(row)
+            index_ms_start = index_ms_end
+
+        index_score_start = index_score_end
+
+    return degeneracy_table

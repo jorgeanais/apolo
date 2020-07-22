@@ -17,10 +17,10 @@ This sub-module contains functions used to complement data from different catalo
 def gaia_cleaning(fname_phot, fname_gaia,
                   clean_dir=dirconfig.cross_vvv_gaia,
                   cont_dir=dirconfig.cross_vvv_gaia_cont,
-                  save_contam=True, distance=8.0):
+                  save_contam=True, distance=1.0):
     """
     This function matches gaia sources against VVV sources. Sources with a distance
-    less than 8 kpc are considered contaminants and are removed from vvv catalog.
+    less than 1 kpc are considered contaminants and are removed from vvv catalog.
     This function generate two tables, one with the cleaned table and the other
     with the contaminants.
 

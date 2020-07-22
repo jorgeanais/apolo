@@ -214,5 +214,3 @@ files_combisphot_gaia = glob.glob(dirconfig.cross_combisphot_gaia + '/*.fits')
 
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.map(preproc.rename_combis_columns, files_combisphot_gaia)
-
-

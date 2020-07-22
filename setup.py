@@ -9,7 +9,8 @@ setup(
     author_email='jrganais@gmail.com',
     license='MIT',
     packages=find_packages(),
-    install_requires=['astroquery', 'numpy', 'matplotlib', 'astropy', 'scipy', 'seaborn', 'hdbscan', 'scikit-learn'],
+    install_requires=['astroquery', 'numpy', 'matplotlib', 'astropy', 'scipy', 'seaborn', 'hdbscan', 'scikit-learn',
+                      'PyYAML', 'ipython'],
     package_data={
         '': ['*.md'],
     },
