@@ -93,7 +93,7 @@ def get_func_args_iterator(tiles, dir1, dir2, *out_dir):
 
 def replace_fill_value_with_nan(table):
     """
-    When writing to fits table format, mask values are replaced with 1e20 (only in the case of floats).
+    When an astropy table is written to fits format, mask values are replaced with 1e20 (only in the case of floats).
     This function modify this behavior replacing the 'fill value' with NaNs as FITS standard prescribes.
     This function is needed in my current version of astropy (4.0.1), in the older (3.2.1) is not required.
 
