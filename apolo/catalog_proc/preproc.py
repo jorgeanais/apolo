@@ -6,8 +6,9 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
-from apolo.catalog_proc.utils import files_exist
+from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan
 from apolo.data import dirconfig, objects
+
 
 """
 This sub-module contains functions used to pre-process raw catalogs
@@ -76,7 +77,9 @@ def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
                 'AUTHOR': 'Jorge Anais'}
     out_fn = 't' + tile_num + '_vvv.fits'
     out_path = path.join(out_dir, out_fn)
-    aux['id', 'ra', 'dec', 'l', 'b', 'mag_J', 'er_J', 'mag_H', 'er_H',
+    replace_fill_value_with_nan(aux)
+    aux['id', 'ra', 'dec', 'l', 'b',
+        'mag_Z', 'er_Z', 'mag_Y', 'er_Y',  'mag_J', 'er_J', 'mag_H', 'er_H',
         'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
 
 
@@ -129,6 +132,7 @@ def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
+    replace_fill_value_with_nan(filtered_tbl)
     filtered_tbl.write(filename_out, format='fits')
 
 
@@ -260,6 +264,7 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
+    # Strangely enough, in this case is not necessary to use replace_fill_value_with_nan() !?
     aux.write(out, format='fits')
 
 
@@ -292,5 +297,4 @@ def rename_combis_columns(input_file, out_dir=dirconfig.cross_combisphot_gaia):
 
     meta = {'STAGE': 'rename_combis_columns'}
     table.meta.update()
-
     table.write(input_file, format='fits', overwrite=True)
