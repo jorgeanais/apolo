@@ -105,7 +105,7 @@ with mp.Pool(n_processes) as pool:
 
 
 # Step 7 ------------------------------------------------------------------------------------------------------------
-# Clean the fits catalogs using parallax from gaia.
+# VVV x Gaia. Clean the fits catalogs using parallax from gaia.
 # Be careful here, files from config.proc_gaia_dir and config.proc_vvv_dir
 # should match (that is why list are sorted first).
 # utils.gaia_cleaning() will raise an error if 'TILE' key (metadata) are not equals.

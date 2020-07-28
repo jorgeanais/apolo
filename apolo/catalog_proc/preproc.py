@@ -107,6 +107,10 @@ def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
     object_id = np.arange(len(tbl), dtype=np.int32) + 1
     tbl['id'] = [f'gaia-{tile_name}_{oid:07d}' for oid in object_id]
 
+    # Extract only sources with parallax
+    mask = ~tbl['parallax'].mask
+    tbl = tbl[mask]
+
     # Default features to be extracted from gaia votable
     if features is None:
         features = ['id', 'ra', 'ra_error', 'dec', 'dec_error', 'l', 'b',
@@ -264,7 +268,9 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
+
     # Strangely enough, in this case is not necessary to use replace_fill_value_with_nan() !?
+    # replace_fill_value_with_nan(aux)
     aux.write(out, format='fits')
 
 

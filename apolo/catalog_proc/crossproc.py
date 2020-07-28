@@ -6,7 +6,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, hstack, vstack
 
-from apolo.catalog_proc.utils import files_exist
+from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan
 from apolo.data import dirconfig
 
 """
@@ -47,9 +47,12 @@ def gaia_cleaning(fname_phot, fname_gaia,
 
     tile_number = tbl_phot.meta['TILE']
 
+    # Mask parallax column
+    # tbl_gaia['parallax'] = Table.MaskedColumn(tbl_gaia['parallax'].data, mask=np.isnan(tbl_gaia['parallax'].data))
+
     # Apply threshold to gaia data
     threshold = 1.0 / distance
-    match_parallax = (tbl_gaia['parallax'] >= threshold) * (tbl_gaia['parallax'] < 1e20)
+    match_parallax = tbl_gaia['parallax'] >= threshold
     tbl_gaia_par = tbl_gaia[match_parallax]
 
     # Cross-match
@@ -95,11 +98,13 @@ def gaia_cleaning(fname_phot, fname_gaia,
     # Save clean catalog to a fits file
     fname = f't{tile_number:03d}_{catype}'
     path_out = path.join(clean_dir, fname + '_clean.fits')
+    replace_fill_value_with_nan(clean_catalog)
     clean_catalog.write(path_out, format='fits')
 
     # Save contaminants
     if save_contam:
         path_out = path.join(cont_dir, fname + '_contaminants.fits')
+        replace_fill_value_with_nan(contam_table)
         contam_table.write(path_out, format='fits')
 
 
@@ -161,6 +166,10 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
     aux_table['dec'] = vvvpsf_table['dec']
     aux_table['l'] = vvvpsf_table['l']
     aux_table['b'] = vvvpsf_table['b']
+    aux_table['mag_Z'] = Table.MaskedColumn(vvvpsf_table['mag_Z'].data, mask=np.isnan(vvvpsf_table['mag_Z'].data))
+    aux_table['er_Z'] = Table.MaskedColumn(vvvpsf_table['er_Z'].data, mask=np.isnan(vvvpsf_table['er_Z'].data))
+    aux_table['mag_Y'] = Table.MaskedColumn(vvvpsf_table['mag_Y'].data, mask=np.isnan(vvvpsf_table['mag_Y'].data))
+    aux_table['er_Y'] = Table.MaskedColumn(vvvpsf_table['er_Y'].data, mask=np.isnan(vvvpsf_table['er_Y'].data))
     aux_table['mag_J'] = vvvpsf_table['mag_J']
     aux_table['eJ'] = vvvpsf_table['er_J']
     aux_table['mag_H'] = vvvpsf_table['mag_H']
@@ -193,6 +202,7 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
     # Write out output table
     fname = f't{tile:03d}_{catype}.fits'
     output_file = path.join(out_dir, fname)
+    replace_fill_value_with_nan(output_table)
     output_table.write(output_file, format='fits')
 
 
@@ -248,4 +258,5 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
     # Save file
     fname = f't{tile_number:03d}_{catype}.fits'
     outfile = path.join(out_dir, fname)
+    replace_fill_value_with_nan(match_table)
     match_table.write(outfile, format='fits', overwrite=True)
