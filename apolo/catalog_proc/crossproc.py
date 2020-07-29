@@ -60,6 +60,13 @@ def gaia_cleaning(fname_phot, fname_gaia,
     idx, d2d, d3d = cphot.match_to_catalog_sky(cgaia)
     match = d2d < 0.34 * u.arcsec
 
+    # Remove duplicated matches
+    # We only consider sources with 1 to 1 match
+    unique_idx, count = np.unique(idx[match], return_counts=True)
+    duplicated_idxs = unique_idx[count > 1]
+    for i in duplicated_idxs:
+        match[idx == i] = False
+
     # join table of matched sources
     join_table = hstack([tbl_phot, tbl_gaia_par[idx]])
 
@@ -136,6 +143,8 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
     cvvv = SkyCoord(vvvpsf_table['ra'], vvvpsf_table['dec'], unit='deg')
     idx, d2d, d3d = c2mass.match_to_catalog_sky(cvvv)
     match = d2d > max_error * u.arcsec
+
+    # In this case repeated sources are not removed (otherwise they will be included in the output catalog)
 
     unpaired_2mass_sources = twomass_table[match]
 
@@ -235,6 +244,13 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
     cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'], unit='deg')
     idx, d2d, d3d = cphot.match_to_catalog_sky(cpm)
     match = d2d < 0.34 * u.arcsec
+
+    # Remove duplicated matches
+    # In this case we prefer to omit sources with duplicated matches
+    unique_idx, count = np.unique(idx[match], return_counts=True)
+    duplicated_idxs = unique_idx[count > 1]
+    for i in duplicated_idxs:
+        match[idx == i] = False
 
     # join table of matched sources
     join_table = hstack([tbl_phot, tbl_pm[idx]], uniq_col_name='{col_name}{table_name}', table_names=['', '_pm'])

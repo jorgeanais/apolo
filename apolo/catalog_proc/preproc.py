@@ -264,7 +264,7 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
         original_col_names = ('mj', 'mh', 'mk', 'mh-mk', 'mj-mk', 'mj-mh')
         vvvlike_col_names = ('mag_J', 'mag_H', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H')
         for original_col_name, vvvlike_col_name in zip(original_col_names, vvvlike_col_names):
-            table.rename_column(original_col_name, vvvlike_col_name)
+            aux.rename_column(original_col_name, vvvlike_col_name)
 
     out = path.join(out_dir, filename + '.fits')
     date_time = datetime.utcnow()
