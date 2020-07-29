@@ -2,6 +2,8 @@ import glob
 from os import path, mkdir
 from apolo.data import dirconfig
 import numpy as np
+from astropy.table import Table
+from astropy.table.column import MaskedColumn, Column
 
 """
 This module contain utility functions related with the pre-processing of catalogs
@@ -12,7 +14,6 @@ def make_dir(*directories):
     """
     This function makes a new directory.
 
-    :param directory: path to new the directory
     :return:
     """
     for directory in directories:
@@ -95,11 +96,28 @@ def replace_fill_value_with_nan(table):
     """
     When an astropy table is written to fits format, mask values are replaced with 1e20 (only in the case of floats).
     This function modify this behavior replacing the 'fill value' with NaNs as FITS standard prescribes.
-    This function is needed in my current version of astropy (4.0.1), in the older (3.2.1) is not required.
+    This function is needed since astropy 4.0.1, in the older versions (e.g. 3.2.1) this is not required.
+    This only works in masked tables, since version 4 tables are not longer masked by default.
+    Useful when writing a table to fits format.
 
     :param table:
     :return:
     """
     for col_name in table.colnames:
-        if np.issubdtype(table[col_name].dtype, np.floating):
-            table[col_name].fill_value = np.nan
+        if isinstance(table[col_name], MaskedColumn):
+            if np.issubdtype(table[col_name].dtype, np.floating):
+                table[col_name].fill_value = np.nan
+
+
+def mask_nan_values(table):
+    """
+    Mask all nan values contained in columns of dtype=float.
+    Useful when reading a fits table.
+
+    :param table:
+    :return:
+    """
+    for col_name in table.colnames:
+        if isinstance(table[col_name], Column):
+            if np.issubdtype(table[col_name].dtype, np.floating):
+                table[col_name] = Table.MaskedColumn(table[col_name].data, mask=np.isnan(table[col_name].data))

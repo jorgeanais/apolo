@@ -43,7 +43,7 @@ raw_vvv_files = glob.glob(dirconfig.raw_vvv + '/*.cals')
 utils.make_dir(dirconfig.proc_vvv)
 
 # parallel execution
-with mp.Pool(n_processes - 1) as pool:
+with mp.Pool(n_processes - 2) as pool:
     pool.map(preproc.process_vvv_cals, raw_vvv_files)
 
 
@@ -209,8 +209,3 @@ utils.make_dir(dirconfig.cross_combisphot_gaia, dirconfig.cross_combisphot_gaia_
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(crossproc.gaia_cleaning, arg_combisphot_gaia)
 
-# Rename columns (re-write old files)
-files_combisphot_gaia = glob.glob(dirconfig.cross_combisphot_gaia + '/*.fits')
-
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.map(preproc.rename_combis_columns, files_combisphot_gaia)

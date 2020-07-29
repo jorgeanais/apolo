@@ -6,7 +6,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, hstack, vstack
 
-from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan
+from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan, mask_nan_values
 from apolo.data import dirconfig
 
 """
@@ -39,7 +39,9 @@ def gaia_cleaning(fname_phot, fname_gaia,
 
     # Load tables
     tbl_phot = Table.read(fname_phot, format='fits')
+    mask_nan_values(tbl_phot)
     tbl_gaia = Table.read(fname_gaia, format='fits')
+    mask_nan_values(tbl_gaia)
 
     # Check if tile match
     if not tbl_phot.meta['TILE'] == tbl_gaia.meta['TILE']:
@@ -47,17 +49,14 @@ def gaia_cleaning(fname_phot, fname_gaia,
 
     tile_number = tbl_phot.meta['TILE']
 
-    # Mask parallax column
-    # tbl_gaia['parallax'] = Table.MaskedColumn(tbl_gaia['parallax'].data, mask=np.isnan(tbl_gaia['parallax'].data))
-
     # Apply threshold to gaia data
     threshold = 1.0 / distance
     match_parallax = tbl_gaia['parallax'] >= threshold
     tbl_gaia_par = tbl_gaia[match_parallax]
 
     # Cross-match
-    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'])
-    cgaia = SkyCoord(tbl_gaia_par['ra'], tbl_gaia_par['dec'])
+    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'], unit='deg')
+    cgaia = SkyCoord(tbl_gaia_par['ra'], tbl_gaia_par['dec'], unit='deg')
     idx, d2d, d3d = cphot.match_to_catalog_sky(cgaia)
     match = d2d < 0.34 * u.arcsec
 
@@ -124,15 +123,17 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
         print('Combining: ', vvvpsf_file, twomass_file)
 
     twomass_table = Table.read(twomass_file, format='fits')
+    mask_nan_values(twomass_table)
     vvvpsf_table = Table.read(vvvpsf_file, format='fits')
+    mask_nan_values(vvvpsf_table)
 
     # Check if tile match
     if not twomass_table.meta['TILE'] == vvvpsf_table.meta['TILE']:
         raise ValueError(f'Files do not correspond to the same tile')
 
     # Cross-match
-    c2mass = SkyCoord(twomass_table['RAJ2000'], twomass_table['DEJ2000'])
-    cvvv = SkyCoord(vvvpsf_table['ra'], vvvpsf_table['dec'])
+    c2mass = SkyCoord(twomass_table['RAJ2000'], twomass_table['DEJ2000'], unit='deg')
+    cvvv = SkyCoord(vvvpsf_table['ra'], vvvpsf_table['dec'], unit='deg')
     idx, d2d, d3d = c2mass.match_to_catalog_sky(cvvv)
     match = d2d > max_error * u.arcsec
 
@@ -221,17 +222,17 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
 
     # Read tables
     tbl_phot = Table.read(phot_file, format='fits')
+    mask_nan_values(tbl_phot)
     tbl_pm = Table.read(pm_file, format='fits')
-    tbl_pm['ra'].unit = u.deg
-    tbl_pm['dec'].unit = u.deg
+    mask_nan_values(tbl_pm)
 
     # Check if tile numbers match
     if not tbl_phot.meta['TILE'] == tbl_pm.meta['TILE']:
         raise ValueError(f'Files do not correspond to the same tile')
 
     # Cross-match
-    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'])
-    cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'])
+    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'], unit='deg')
+    cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'], unit='deg')
     idx, d2d, d3d = cphot.match_to_catalog_sky(cpm)
     match = d2d < 0.34 * u.arcsec
 
@@ -259,4 +260,4 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
     fname = f't{tile_number:03d}_{catype}.fits'
     outfile = path.join(out_dir, fname)
     replace_fill_value_with_nan(match_table)
-    match_table.write(outfile, format='fits', overwrite=True)
+    match_table.write(outfile, format='fits')

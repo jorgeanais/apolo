@@ -6,7 +6,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
-from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan
+from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan, mask_nan_values
 from apolo.data import dirconfig, objects
 
 
@@ -34,7 +34,7 @@ def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
     table = Table.read(input_file, format='ascii')
 
     # Check if all the columns exist in table
-    expected_cols = ['ra', 'dec', 'mag_J', 'mag_H', 'mag_Ks']
+    expected_cols = ['ra', 'dec', 'mag_Z', 'er_Z', 'mag_Y', 'er_Y', 'mag_J', 'er_J', 'mag_H', 'er_H', 'mag_Ks', 'er_Ks']
     if not all(_ in table.columns for _ in expected_cols):
         raise KeyError(f'Table does not contain all expected columns: {expected_cols}')
 
@@ -45,8 +45,6 @@ def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
     # Unique Object ID
     object_id = np.arange(len(table), dtype=np.int32) + 1
     table['id'] = [f'vvv-t{tile_num}_{oid:07d}' for oid in object_id]
-
-    path.join(out_dir, '*.fit')
 
     # Create l and b columns
     table['ra'].unit = u.deg
@@ -123,7 +121,6 @@ def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
                     'radial_velocity', 'radial_velocity_error', 'source_id']
 
     filtered_tbl = tbl[features]
-    # print(filtered_tbl.info())
 
     filename_out = path.basename(input_file).replace('.vot.gz', '') + '.fits'
     filename_out = path.join(out_dir, filename_out)
@@ -213,6 +210,7 @@ def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
 
     filename += '.fits'
     out_path = path.join(out_dir, filename)
+    replace_fill_value_with_nan(table)
     table[match].write(out_path, format='fits')
 
 
@@ -232,6 +230,7 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
         print(f'Processing file {input_file}')
 
     table = Table.read(input_file, format='csv')
+    mask_nan_values(table)
 
     # Filename and tile number
     filename = path.splitext(path.basename(input_file))[0]
@@ -249,14 +248,23 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
     table['b'] = aux.b
 
     # Create colors
-    mask = ~np.isnan(table['pmra']) * ~np.isnan(table['pmdec'])
+    mask = ~table['pmra'].mask * ~table['pmdec'].mask
+
     if combis_phot:
-        mask *= ~np.isnan(table['mj']) * ~np.isnan(table['mh']) * ~np.isnan(table['mk'])
+        # Only consider rows with complete photometric info
+        mask *= ~table['mj'].mask * ~table['mh'].mask * ~table['mk'].mask
 
     aux = table[mask]
     aux['mh-mk'] = aux['mh'] - aux['mk']
     aux['mj-mk'] = aux['mj'] - aux['mk']
     aux['mj-mh'] = aux['mj'] - aux['mh']
+
+    if combis_phot:
+        # Replace column names with vvv-like ones
+        original_col_names = ('mj', 'mh', 'mk', 'mh-mk', 'mj-mk', 'mj-mh')
+        vvvlike_col_names = ('mag_J', 'mag_H', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H')
+        for original_col_name, vvvlike_col_name in zip(original_col_names, vvvlike_col_names):
+            table.rename_column(original_col_name, vvvlike_col_name)
 
     out = path.join(out_dir, filename + '.fits')
     date_time = datetime.utcnow()
@@ -269,38 +277,9 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
                 'CTIME': date_time.strftime('%H:%M:%S'),
                 'AUTHOR': 'Jorge Anais'}
 
-    # Strangely enough, in this case is not necessary to use replace_fill_value_with_nan() !?
-    # replace_fill_value_with_nan(aux)
+    if combis_phot:
+        aux.meta.update({'CATYPE': 'combisphot'})
+
+    replace_fill_value_with_nan(aux)
     aux.write(out, format='fits')
 
-
-def rename_combis_columns(input_file, out_dir=dirconfig.cross_combisphot_gaia):
-    """
-    This function renames columns mj mh mk and their respective colors with VVV-like names.
-    It overwrite original files if out_dir param is leave as default, so be careful!
-
-    :param input_file: String. Path to the file
-    :param out_dir: Output directory.
-    :return:
-    """
-
-    # Check if files exist
-    if files_exist(input_file):
-        print(f'Processing file {input_file}')
-
-    table = Table.read(input_file, format='fits')
-
-    original_col_names = ('mj', 'mh', 'mk', 'mh-mk', 'mj-mk', 'mj-mh')
-    vvvlike_col_names = ('mag_J', 'mag_H', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H')
-
-    # Check if columns exist
-    if not all(_ in table.columns for _ in original_col_names):
-        raise KeyError(f'Table does not contain all expected columns: {original_col_names}')
-
-    # Rename columns
-    for original_col_name, vvvlike_col_name in zip(original_col_names, vvvlike_col_names):
-        table.rename_column(original_col_name, vvvlike_col_name)
-
-    meta = {'STAGE': 'rename_combis_columns'}
-    table.meta.update()
-    table.write(input_file, format='fits', overwrite=True)
