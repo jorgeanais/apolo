@@ -6,7 +6,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table, hstack, vstack
 
-from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan, mask_nan_values
+from apolo.catalog_proc.utils import files_exist, read_fits_table, write_fits_table
 from apolo.data import dirconfig
 
 """
@@ -38,10 +38,8 @@ def gaia_cleaning(fname_phot, fname_gaia,
         print(f'Processing files: ', fname_phot, fname_gaia)
 
     # Load tables
-    tbl_phot = Table.read(fname_phot, format='fits')
-    mask_nan_values(tbl_phot)
-    tbl_gaia = Table.read(fname_gaia, format='fits')
-    mask_nan_values(tbl_gaia)
+    tbl_phot = read_fits_table(fname_phot)
+    tbl_gaia = read_fits_table(fname_gaia)
 
     # Check if tile match
     if not tbl_phot.meta['TILE'] == tbl_gaia.meta['TILE']:
@@ -55,8 +53,8 @@ def gaia_cleaning(fname_phot, fname_gaia,
     tbl_gaia_par = tbl_gaia[match_parallax]
 
     # Cross-match
-    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'], unit='deg')
-    cgaia = SkyCoord(tbl_gaia_par['ra'], tbl_gaia_par['dec'], unit='deg')
+    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'])
+    cgaia = SkyCoord(tbl_gaia_par['ra'], tbl_gaia_par['dec'])
     idx, d2d, d3d = cphot.match_to_catalog_sky(cgaia)
     match = d2d < 0.34 * u.arcsec
 
@@ -102,16 +100,14 @@ def gaia_cleaning(fname_phot, fname_gaia,
                           'AUTHOR': 'Jorge Anais'}
 
     # Save clean catalog to a fits file
-    fname = f't{tile_number:03d}_{catype}'
-    path_out = path.join(clean_dir, fname + '_clean.fits')
-    replace_fill_value_with_nan(clean_catalog)
-    clean_catalog.write(path_out, format='fits')
+    filename = f't{tile_number:03d}_{catype}'
+    path_out = path.join(clean_dir, filename + '_clean.fits')
+    write_fits_table(clean_catalog, path_out)
 
     # Save contaminants
     if save_contam:
-        path_out = path.join(cont_dir, fname + '_contaminants.fits')
-        replace_fill_value_with_nan(contam_table)
-        contam_table.write(path_out, format='fits')
+        path_out = path.join(cont_dir, filename + '_contaminants.fits')
+        write_fits_table(contam_table, path_out)
 
 
 def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2mass, max_error=1.00):
@@ -129,10 +125,9 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
     if files_exist(twomass_file, vvvpsf_file):
         print('Combining: ', vvvpsf_file, twomass_file)
 
-    twomass_table = Table.read(twomass_file, format='fits')
-    mask_nan_values(twomass_table)
-    vvvpsf_table = Table.read(vvvpsf_file, format='fits')
-    mask_nan_values(vvvpsf_table)
+    # Read catalogs
+    twomass_table = read_fits_table(twomass_file)
+    vvvpsf_table = read_fits_table(vvvpsf_file)
 
     # Check if tile match
     if not twomass_table.meta['TILE'] == vvvpsf_table.meta['TILE']:
@@ -209,11 +204,10 @@ def combine_vvv_2mass(vvvpsf_file, twomass_file, out_dir=dirconfig.cross_vvv_2ma
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
 
-    # Write out output table
+    # Write output table
     fname = f't{tile:03d}_{catype}.fits'
     output_file = path.join(out_dir, fname)
-    replace_fill_value_with_nan(output_table)
-    output_table.write(output_file, format='fits')
+    write_fits_table(output_table, output_file)
 
 
 def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
@@ -230,18 +224,16 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
         print(f'Processing files:', phot_file, pm_file)
 
     # Read tables
-    tbl_phot = Table.read(phot_file, format='fits')
-    mask_nan_values(tbl_phot)
-    tbl_pm = Table.read(pm_file, format='fits')
-    mask_nan_values(tbl_pm)
+    tbl_phot = read_fits_table(phot_file)
+    tbl_pm = read_fits_table(pm_file)
 
     # Check if tile numbers match
     if not tbl_phot.meta['TILE'] == tbl_pm.meta['TILE']:
         raise ValueError(f'Files do not correspond to the same tile')
 
     # Cross-match
-    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'], unit='deg')
-    cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'], unit='deg')
+    cphot = SkyCoord(tbl_phot['ra'], tbl_phot['dec'])
+    cpm = SkyCoord(tbl_pm['ra'], tbl_pm['dec'])
     idx, d2d, d3d = cphot.match_to_catalog_sky(cpm)
     match = d2d < 0.34 * u.arcsec
 
@@ -275,5 +267,4 @@ def add_proper_motions(phot_file, pm_file, out_dir=dirconfig.test_knowncl):
     # Save file
     fname = f't{tile_number:03d}_{catype}.fits'
     outfile = path.join(out_dir, fname)
-    replace_fill_value_with_nan(match_table)
-    match_table.write(outfile, format='fits')
+    write_fits_table(match_table, outfile)

@@ -6,7 +6,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
-from apolo.catalog_proc.utils import files_exist, replace_fill_value_with_nan, mask_nan_values
+from apolo.catalog_proc.utils import files_exist, write_fits_table, mask_nan_values
 from apolo.data import dirconfig, objects
 
 
@@ -75,10 +75,10 @@ def process_vvv_cals(input_file, out_dir=dirconfig.proc_vvv):
                 'AUTHOR': 'Jorge Anais'}
     out_fn = 't' + tile_num + '_vvv.fits'
     out_path = path.join(out_dir, out_fn)
-    replace_fill_value_with_nan(aux)
-    aux['id', 'ra', 'dec', 'l', 'b',
-        'mag_Z', 'er_Z', 'mag_Y', 'er_Y',  'mag_J', 'er_J', 'mag_H', 'er_H',
-        'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H'].write(out_path, format='fits')
+
+    output_table = aux['id', 'ra', 'dec', 'l', 'b', 'mag_Z', 'er_Z', 'mag_Y', 'er_Y', 'mag_J', 'er_J',
+                       'mag_H', 'er_H', 'mag_Ks', 'er_Ks', 'H-Ks', 'J-Ks', 'J-H']
+    write_fits_table(output_table, out_path)
 
 
 def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
@@ -133,8 +133,8 @@ def process_gaia_vot(input_file, out_dir=dirconfig.proc_gaia, features=None):
                          'CDATE': date_time.strftime('%Y-%m-%d'),
                          'CTIME': date_time.strftime('%H:%M:%S'),
                          'AUTHOR': 'Jorge Anais'}
-    replace_fill_value_with_nan(filtered_tbl)
-    filtered_tbl.write(filename_out, format='fits')
+
+    write_fits_table(filtered_tbl, filename_out)
 
 
 def transformation_2mass_to_vista(t2mass):
@@ -210,8 +210,8 @@ def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
 
     filename += '.fits'
     out_path = path.join(out_dir, filename)
-    replace_fill_value_with_nan(table)
-    table[match].write(out_path, format='fits')
+
+    write_fits_table(table[match], out_path)
 
 
 def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=False):
@@ -280,6 +280,6 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
     if combis_phot:
         aux.meta.update({'CATYPE': 'combisphot'})
 
-    replace_fill_value_with_nan(aux)
-    aux.write(out, format='fits')
+
+    write_fits_table(aux, out)
 

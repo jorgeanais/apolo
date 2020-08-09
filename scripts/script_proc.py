@@ -186,7 +186,7 @@ with mp.Pool(n_processes) as pool:
 # Step 13 -----------------------------------------------------------------------------------------------------------
 # Combisphot
 # Proc combi catalogs but removing all sources with pm & jhk-bands missing values
-# Third argument in process_combis_csv equals True indicate combiphot (combis*)
+# Third argument in process_combis_csv equals True indicate combisphot (combis*)
 
 files_combisphot = glob.glob(dirconfig.raw_combis + '/*.csv')
 utils.make_dir(dirconfig.proc_combisphot)

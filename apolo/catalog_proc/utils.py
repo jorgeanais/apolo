@@ -119,5 +119,18 @@ def mask_nan_values(table):
     """
     for col_name in table.colnames:
         if isinstance(table[col_name], Column):
-            if np.issubdtype(table[col_name].dtype, np.floating):
-                table[col_name] = Table.MaskedColumn(table[col_name].data, mask=np.isnan(table[col_name].data))
+            if np.issubdtype(table[col_name].dtype, np.floating) and np.sum(np.isnan(table[col_name])) > 0:
+                table[col_name] = Table.MaskedColumn(table[col_name].data,
+                                                     mask=np.isnan(table[col_name].data),
+                                                     unit=table[col_name].unit)
+
+
+def read_fits_table(file):
+    table = Table.read(file, format='fits')
+    mask_nan_values(table)
+    return table
+
+
+def write_fits_table(table, output_file):
+    replace_fill_value_with_nan(table)
+    table.write(output_file, format='fits')
