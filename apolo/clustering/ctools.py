@@ -101,8 +101,7 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     # Clustering is done here
     clusterer = hdbscan.HDBSCAN(**kargs).fit(data)
 
-    n_clusters = len(np.unique(clusterer.labels_))
-    # f'Number of clusters identified: {n_cluster}'
+    n_clusters = clusterer.labels_.max() + 2
 
     # Add labels, probabilities and meta data to the table
     table['label'] = clusterer.labels_

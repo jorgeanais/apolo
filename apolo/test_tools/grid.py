@@ -27,21 +27,20 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
 
     for mcs, ms in grid_of_params:
         copy_table = input_table.copy()
-        data, clusterer = ctools.do_hdbscan(copy_table, space_param=space_param,
+        data, clusterer = ctools.do_hdbscan(copy_table,
+                                            space_param=space_param,
                                             cols=cols,
                                             min_cluster_size=int(mcs),
                                             min_samples=int(ms),
                                             cluster_selection_method=cluster_selection_method)
 
-        n_cluster = len(np.unique(clusterer.labels_))
+        n_cluster = clusterer.labels_.max() + 2
         if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
-            r = [ms, mcs, n_cluster, score]
+            r = [mcs, ms, n_cluster, score]
             results.add_row(r)
-        else:
-            score = np.nan
 
-    results.sort(['score', 'ms', 'mcs'], reverse=True)
+    results.sort(['score'], reverse=True)
 
     return results
 
@@ -88,7 +87,7 @@ def perform_kounkel_grid_score(input_table, range_params=(5, 16), step=1, space_
     return results
 
 
-def score_degeneracy_summary(score_file):
+def summarize_score(score_table):
     """
     This function produces a summary (table) of the Silhouette score degeneracy, indicating
     ms and mcs ranges for a single score value.
@@ -102,7 +101,6 @@ def score_degeneracy_summary(score_file):
 
     """
 
-    score_table = Table.read(score_file)
     score_table.sort(['score', 'ms', 'mcs'], reverse=True)
 
     table_len = len(score_table)
@@ -110,7 +108,7 @@ def score_degeneracy_summary(score_file):
     unique_score_values = unique_score_values[::-1]
     count_unique_score_values = count_unique_score_values[::-1]
 
-    degeneracy_table = Table(names=('score', 'ms', 'mcs_start', 'mcs_end', 'n_clusters'))
+    degeneracy_table = Table(names=('score', 'ms', 'mcs_start', 'mcs_end', 'level_degeneracy', 'n_clusters'))
     row = []
     index_score_start = 0
     for score, count_score in zip(unique_score_values, count_unique_score_values):
@@ -122,11 +120,12 @@ def score_degeneracy_summary(score_file):
 
         index_ms_start = index_score_start
         for ms, count_ms in zip(unique_ms_values, count_unique_ms_values):
+            # This loop is just in the unlikely case that for one score there are more than one ms value
             index_ms_end = index_ms_start + count_ms
             unique_mcs_values = np.unique(score_table['mcs'][index_ms_start:index_ms_end])
             n_clusters = score_table['n_clusters'][index_ms_start]
-
-            row = [score, ms, unique_mcs_values[0], unique_mcs_values[-1], n_clusters]
+            level_degeneracy = len(unique_mcs_values)
+            row = [score, ms, unique_mcs_values[0], unique_mcs_values[-1], level_degeneracy, n_clusters]
             degeneracy_table.add_row(row)
             index_ms_start = index_ms_end
 

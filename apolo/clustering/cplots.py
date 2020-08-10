@@ -4,11 +4,12 @@ import numpy as np
 from astropy import units as u
 from apolo.data import dirconfig, objects
 from apolo.data.objects import all_tiles, known_clusters
+from apolo.catalog_proc.utils import write_fits_table
 from os import path
 import time
 
 
-def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
+def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_scores_table=None):
     """
     This function helps to visualize the results of do_hdbscan function. It produces the followings plots:
       - l vs b
@@ -20,6 +21,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
 
     :param table: An astropy table produced by apolo.clustering.ctools.do_hdbscan() function.
     :param output_dir: string. Path to a dir where output are saved
+    :param summarized_scores_table:
     :return:
     """
 
@@ -76,17 +78,25 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
     else:
         superior_title += 'No metadata available'
 
-    # Common parameters for ptl.scatter
-    kargs_noise = dict(s=50, linewidth=0, alpha=0.10, marker='.')
-    kargs_cl = dict(s=50, linewidth=0, alpha=0.50, marker='.')
+    for k, v in properties.items():
+        superior_title += k + '=' + str(v) + ' '
+
+    if summarized_scores_table is not None:
+        max_score = summarized_scores_table['score'][0]
+        ms = summarized_scores_table['ms'][0]
+        mcs_start = summarized_scores_table['mcs_start'][0]
+        mcs_end = summarized_scores_table['mcs_end'][0]
+        superior_title += f'\n max_score: {max_score:.6f}  ms: {ms}  mcs_range: {int(mcs_start)} - {int(mcs_end)}\n'
 
     # -----Visualization-----
     my_dpi = 100
     plt.figure(figsize=(1920/my_dpi, 1080/my_dpi), dpi=my_dpi)
 
-    for k, v in properties.items():
-        superior_title += k + '=' + str(v) + ' '
+    # Common parameters for ptl.scatter
+    kargs_noise = dict(s=50, linewidth=0, alpha=0.10, marker='.')
+    kargs_cl = dict(s=50, linewidth=0, alpha=0.50, marker='.')
 
+    # Title
     plt.suptitle(superior_title, fontsize='large')
 
     # l b
@@ -179,7 +189,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl):
 
     # Save table as fits
     filename_table = path.join(output_dir, filename_base + '.fits')
-    table.write(filename_table, format='fits', overwrite=False)
+    write_fits_table(table, filename_table)
 
 
 def make_plot_roi():

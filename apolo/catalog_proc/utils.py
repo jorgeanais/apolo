@@ -133,4 +133,4 @@ def read_fits_table(file):
 
 def write_fits_table(table, output_file):
     replace_fill_value_with_nan(table)
-    table.write(output_file, format='fits')
+    table.write(output_file, format='fits', overwrite=False)

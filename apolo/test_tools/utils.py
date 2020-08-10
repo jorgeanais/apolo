@@ -2,6 +2,7 @@ import numpy as np
 from astropy.table import Table
 from astropy.coordinates import SkyCoord, Galactic
 from datetime import datetime
+from apolo.catalog_proc.utils import read_fits_table
 
 
 def remove_nanvalues_in_pm(table):
@@ -66,7 +67,7 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
     :param times: size of the cut area in terms of the nominal size of the cluster
     :return: an astropy-table with sources that lie in a neighborhood of the cluster
     """
-    table = Table.read(input_catalog, format='fits')
+    table = read_fits_table(input_catalog)
 
     date_time = datetime.utcnow()
     metadata = {'FILE': input_catalog,
@@ -77,7 +78,6 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
                 'CTIME': date_time.strftime('%H:%M:%S')}
 
     table.meta.update(metadata)
-    # table = remove_nanvalues_in_pm(table)
     table['Q'] = add_pseudocolor(table, color_excess=c_excess)
 
     return spatial_cut(table, cluster.coord, times * cluster.asize)

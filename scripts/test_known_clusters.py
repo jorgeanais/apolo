@@ -19,7 +19,8 @@ utils.check_base_data_structure()
 # First, define a list of cluster. If you want to add a new cluster object,
 # you can do it in apolo/data/object.py. Then, which_tile() will
 # search their corresponding tile automatically.
-clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
+# clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
+clusters = [objects.cl86]
 tiles = which_tile(clusters, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: `Phot+PM` or `PhotOnly`
