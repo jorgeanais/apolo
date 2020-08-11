@@ -1,4 +1,4 @@
-from apolo.data.models import StellarCluster, Tile
+from apolo.data.models import StellarCluster, Tile, EmptyRegion
 
 """
 This module contains all the info about tiles and known cluster
@@ -45,3 +45,15 @@ cl74 = StellarCluster('VVVCL074', (336.3737, 0.1941), 1.1)
 cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 
 known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88, 'VDBH22': vdbh22}
+
+# Empty regions (default values for position_angle=0 and separation_factor=5)
+e_m81a = EmptyRegion('e_m81a', m81)
+e_vdbh22a = EmptyRegion('e_vdbh22a', vdbh22)
+e_cl86a = EmptyRegion('e_cl86a', cl86)
+e_cl74a = EmptyRegion('e_cl74a', cl74)
+e_cl88a = EmptyRegion('e_cl88a', cl88)
+
+empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22a, 'e_cl86a': e_cl86a,
+                                         'e_cl74a': e_cl74a, 'e_cl88a': e_cl88a}
+
+all_regions = {**known_clusters, **empty_regions_close_to_known_clusters}

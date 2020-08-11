@@ -34,6 +34,28 @@ class StellarCluster:
         return self._name
 
 
+class EmptyRegion(StellarCluster):
+    """
+    This class is made to be an equivalent of StellarCluster but for empty region around a Stellar Cluster.
+    It is expected that any instance of this class is constructed from a StellarCluster object.
+    """
+    def __init__(self, name, cluster, position_angle=0, separation_factor=5):
+        self._position_angle = position_angle
+        self._separation_factor = separation_factor
+        region_coords = cluster.coord.directional_offset_by(position_angle, separation_factor * cluster.asize)
+        coord = (region_coords.l.value, region_coords.b.value)
+        asize = cluster.asize.value
+        super().__init__(name, coord, asize)
+
+    @property
+    def position_angle(self):
+        return self._position_angle
+
+    @property
+    def separation_factor(self):
+        return  self._separation_factor
+
+
 class Tile:
     """
     This class is made to encapsulate the relevant information of VVV tile
@@ -90,3 +112,5 @@ class Tile:
             raise FileNotFoundError(f'No match found for tile {self._name}')
 
         return files[0]
+
+
