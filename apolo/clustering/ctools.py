@@ -86,17 +86,15 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
         kargs['cluster_selection_method'] = 'leaf'
 
     # Print cluster name if exists
-    cluster_name = ''
-    if 'CLUSTER' in table.meta:
-        cluster_name = table.meta['CLUSTER']
-    elif 'OBJECT' in table.meta:
-        cluster_name = table.meta['OBJECT']
+    object_name = ''
+    if 'OBJNAME' in table.meta:
+        object_name = table.meta['OBJNAME']
 
     # Print HDBSCAN* parameters
     mcs = kargs['min_cluster_size']
     ms = kargs['min_samples']
     csm = kargs['cluster_selection_method']
-    print(f'{cluster_name} MCS: {mcs}  MS:{ms}  CSM:{csm}')
+    print(f'{object_name} MCS: {mcs}  MS:{ms}  CSM:{csm}')
 
     # Clustering is done here
     clusterer = hdbscan.HDBSCAN(**kargs).fit(data)

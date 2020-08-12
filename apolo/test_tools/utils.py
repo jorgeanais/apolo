@@ -53,7 +53,7 @@ def spatial_cut(table, center, diameter):
     return result
 
 
-def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
+def setup_region(input_catalog, object_of_interest, c_excess=1.8, times=2.0):
     """
     This function returns a small region around a cluster of interest in order to perform
     the evaluation of the model grid afterwards. The param times indicates how big is
@@ -62,7 +62,7 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
 
 
     :param input_catalog: path to the catalog
-    :param cluster: a cluster object
+    :param object_of_interest: a StellarCluster or EmptyRegion object
     :param c_excess: color excess  used for extinction law
     :param times: size of the cut area in terms of the nominal size of the cluster
     :return: an astropy-table with sources that lie in a neighborhood of the cluster
@@ -71,7 +71,7 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
 
     date_time = datetime.utcnow()
     metadata = {'FILE': input_catalog,
-                'CLUSTER': cluster.name,
+                'OBJNAME': object_of_interest.name,
                 'TIMES': times,
                 'STAGE': 'setup_region',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
@@ -80,7 +80,7 @@ def setup_region(input_catalog, cluster, c_excess=1.8, times=2.0):
     table.meta.update(metadata)
     table['Q'] = add_pseudocolor(table, color_excess=c_excess)
 
-    return spatial_cut(table, cluster.coord, times * cluster.asize)
+    return spatial_cut(table, object_of_interest.coord, times * object_of_interest.asize)
 
 
 def rename_combis_columns(table):
@@ -100,7 +100,7 @@ def setup_region_combi(input_catalog, cluster, c_excess=1.8, times=2.0):
 
     date_time = datetime.utcnow()
     metadata = {'FILE': input_catalog,
-                'CLUSTER': cluster.name,
+                'OBJNAME': cluster.name,
                 'TIMES': times,
                 'STAGE': 'setup_region_combi',
                 'CDATE': date_time.strftime('%Y-%m-%d'),

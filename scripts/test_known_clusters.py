@@ -16,11 +16,16 @@ fits table (with clustering results).
 
 utils.check_base_data_structure()
 
-# First, define a list of cluster. If you want to add a new cluster object,
-# you can do it in apolo/data/object.py. Then, which_tile() will
-# search their corresponding tile automatically.
-clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
-tiles = which_tile(clusters, objects.all_tiles)
+# First, define a list of cluster or empty regions.
+# If you want to add a new object, you can do it in apolo/data/object.py.
+# Then, which_tile() will search their corresponding tile automatically. E.g.
+#     clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
+#     which_tile(clusters, objects.all_tiles)
+
+object_list = [objects.m81, objects.cl86, objects.cl74, objects.cl88,
+               objects.e_m81a, objects.e_cl86a, objects.e_cl74a, objects.e_cl88a]
+
+tiles = which_tile(object_list, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: `Phot+PM` or `PhotOnly`
 space_param = 'Phot+PM'
@@ -37,7 +42,7 @@ out_dir = path.join(dirconfig.test_knowncl, 'vvv_combis_gaia/')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
+models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
 # and passing the arguments `models`,
@@ -53,7 +58,7 @@ out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia/')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
+models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
 # and passing the arguments `models`,
@@ -68,7 +73,7 @@ out_dir = path.join(dirconfig.test_knowncl, 'combis_gaia/')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(clusters, tiles)]
+models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
 # and passing the arguments `models`

@@ -61,10 +61,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     superior_title = ''
     object_name = ''
 
-    if 'CLUSTER' in table.meta:
-        object_name = table.meta['CLUSTER']
-    elif 'OBJECT' in table.meta:
-        object_name = table.meta['OBJECT']
+    if 'OBJNAME' in table.meta:
+        object_name = table.meta['OBJNAME']
 
     if 'ALGORIT' in table.meta:
         if table.meta['ALGORIT'] == 'hdbscan':
@@ -109,8 +107,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     plt.xlim(xmax, xmin)
 
     # plot circle
-    if 'CLUSTER' in table.meta:
-        cluster = objects.known_clusters[table.meta['CLUSTER']]
+    if 'OBJNAME' in table.meta:
+        cluster = objects.all_regions[table.meta['OBJNAME']]
         r = cluster.asize.to_value(unit=u.deg) / 2.
         l_cluster = cluster.coord.l.to_value(unit=u.deg)
         b_cluster = cluster.coord.b.to_value(unit=u.deg)
