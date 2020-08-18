@@ -32,7 +32,7 @@ def add_pseudocolor(table, color_excess=1.8):
     """
 
     table.meta.update({'CEXCESS': color_excess})
-    return table['J-H'] - color_excess * table['H-Ks']
+    table['Q'] = table['J-H'] - color_excess * table['H-Ks']
 
 
 def spatial_cut(table, center, diameter):
@@ -53,6 +53,21 @@ def spatial_cut(table, center, diameter):
     return result
 
 
+def read_catalog(input_catalog, times=2.0):
+
+    table = read_fits_table(input_catalog)
+
+    date_time = datetime.utcnow()
+    metadata = {'FILE': input_catalog,
+                'TIMES': times,
+                'STAGE': 'read_catalog',
+                'CDATE': date_time.strftime('%Y-%m-%d'),
+                'CTIME': date_time.strftime('%H:%M:%S')}
+
+    table.meta.update(metadata)
+    return table
+
+
 def setup_region(input_catalog, object_of_interest, c_excess=1.8, times=2.0):
     """
     This function returns a small region around a cluster of interest in order to perform
@@ -67,8 +82,7 @@ def setup_region(input_catalog, object_of_interest, c_excess=1.8, times=2.0):
     :param times: size of the cut area in terms of the nominal size of the cluster
     :return: an astropy-table with sources that lie in a neighborhood of the cluster
     """
-    table = read_fits_table(input_catalog)
-
+    table = read_catalog(input_catalog, times=times)
     date_time = datetime.utcnow()
     metadata = {'FILE': input_catalog,
                 'OBJNAME': object_of_interest.name,
@@ -76,10 +90,8 @@ def setup_region(input_catalog, object_of_interest, c_excess=1.8, times=2.0):
                 'STAGE': 'setup_region',
                 'CDATE': date_time.strftime('%Y-%m-%d'),
                 'CTIME': date_time.strftime('%H:%M:%S')}
-
     table.meta.update(metadata)
-    table['Q'] = add_pseudocolor(table, color_excess=c_excess)
-
+    add_pseudocolor(table, color_excess=c_excess)
     return spatial_cut(table, object_of_interest.coord, times * object_of_interest.asize)
 
 
@@ -108,7 +120,7 @@ def setup_region_combi(input_catalog, cluster, c_excess=1.8, times=2.0):
                 }
     table.meta.update(metadata)
     table = remove_nanvalues_in_pm(table)
-    table['Q'] = add_pseudocolor(table, color_excess=c_excess)
+    add_pseudocolor(table, color_excess=c_excess)
 
     return spatial_cut(table, cluster.coord, times * cluster.asize)
 
