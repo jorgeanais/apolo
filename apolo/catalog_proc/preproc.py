@@ -192,11 +192,11 @@ def process_2mass_vot(input_file, out_dir=dirconfig.proc_2mass):
     lmin, lmax = tile.lmin, tile.lmax
     bmin, bmax = tile.bmin, tile.bmax
 
-    lfilter = (table['l'] >= lmin) * (table['l'] <= lmax)
-    bfilter = (table['b'] >= bmin) * (table['b'] <= bmax)
+    l_filter = (table['l'] >= lmin) * (table['l'] <= lmax)
+    b_filter = (table['b'] >= bmin) * (table['b'] <= bmax)
 
-    qfilter = table['Qflg'] == 'AAA'
-    match = lfilter * bfilter * qfilter
+    q_filter = table['Qflg'] == 'AAA'
+    match = l_filter * b_filter * q_filter
 
     date_time = datetime.utcnow()
 
@@ -247,14 +247,16 @@ def process_combis_csv(input_file, out_dir=dirconfig.proc_combis, combis_phot=Fa
     table['l'] = aux.l
     table['b'] = aux.b
 
-    # Create colors
+    # Remove sources with missing data
     mask = ~table['pmra'].mask * ~table['pmdec'].mask
 
     if combis_phot:
-        # Only consider rows with complete photometric info
+        # Special case, Only consider rows with complete photometric info
         mask *= ~table['mj'].mask * ~table['mh'].mask * ~table['mk'].mask
 
     aux = table[mask]
+
+    # Create colors
     aux['mh-mk'] = aux['mh'] - aux['mk']
     aux['mj-mk'] = aux['mj'] - aux['mk']
     aux['mj-mh'] = aux['mj'] - aux['mh']

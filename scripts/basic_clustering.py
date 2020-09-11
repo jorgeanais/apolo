@@ -17,13 +17,13 @@ tile = utils.which_tile(stellar_cluster, objects.all_tiles)[0]
 catalog_dir = dirconfig.cross_vvv_2mass_combis_gaia
 
 catalog_file = tile.get_file(catalog_dir)  # This finds automatically the respective tile-file inside catalog_dir
-region = utils.setup_region(catalog_file, stellar_cluster, times=4.0)  # Only a region of 4 times nominal SC radius
+region = utils.setup_region(catalog_file, stellar_cluster, times=2.0)  # Only a region of 2 times nominal SC radius
 
 # Perform HDBSCAN clustering algorithm. This function update region table adding two columns: label and probabilities
 # and adds metadata relative to the clustering itself.
-ctools.do_hdbscan(region, space_param='Phot+PM',
-                  min_cluster_size=9,
-                  min_samples=8,
+ctools.do_hdbscan(region, space_param='Phot+PM',  # 'Phot+PM' 'Colors+PM'
+                  min_cluster_size=5,
+                  min_samples=13,
                   cluster_selection_method='leaf')
 
 # This function produces multiple plots to help to visualize data. Also it saves the results of the clustering

@@ -23,8 +23,8 @@ utils.add_pseudocolor(table, color_excess=1.8)
 # Perform hdbscan with selected parameters
 startTime = datetime.now()
 ctools.do_hdbscan(table, space_param='Phot+PM',
-                  min_cluster_size=9,
-                  min_samples=8,
+                  min_cluster_size=12,
+                  min_samples=5,
                   cluster_selection_method='leaf')
 print(datetime.now() - startTime)
 

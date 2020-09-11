@@ -38,11 +38,11 @@ def add_pseudocolor(table, color_excess=1.8):
 def spatial_cut(table, center, diameter):
     """
     This function receive a table and central coordinates and returns
-    only data that lie inside a circle centered in the centralpos with
+    only data that lie inside a circle centered in the central pos with
     radius in arcmin
     :param table: An astropy table with data (it should include l and b columns)
     :param center: A SkyCoord object with the central coordinates
-    :param diameter: Diameter with units, usually in arcminutes
+    :param diameter: Diameter with units, usually in arcmin
     :return: spacial filtered astropy-table
     """
     radius = diameter * 0.5

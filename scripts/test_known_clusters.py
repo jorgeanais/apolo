@@ -54,7 +54,7 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
 # VVV 2MASS COMBIS GAIA
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia/')
+out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia_Phot_plus_PM_eom/')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine

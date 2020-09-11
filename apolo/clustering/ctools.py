@@ -31,6 +31,8 @@ def setup_data(table, space_param='Phot+PM', cols=None, scale_lb=True):
         cols = ('l', 'b', 'Q')
     elif space_param == 'Colors+PM':
         cols = ('l', 'b', 'H-Ks', 'J-Ks', 'J-H', 'Q', 'pmra', 'pmdec')
+    elif space_param == 'All-in':
+        cols = ('l', 'b', 'mag_J', 'mag_H', 'mag_Ks', 'H-Ks', 'J-Ks', 'J-H', 'Q', 'pmra', 'pmdec')
     elif space_param == 'custom':
         if cols is None:
             raise ValueError('You must give cols argument with the parameters in a tuple')
