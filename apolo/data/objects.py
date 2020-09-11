@@ -46,6 +46,14 @@ cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 
 known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88, 'VDBH22': vdbh22}
 
+# Cantat-Guadin et al. 2020 selection of clusters ---
+# Patchick_94 336.458 0.855 0.016
+pat94 = StellarCluster('Patchick_94', (336.458, 0.855), 0.016 * 60 * 2)
+# Westerlund_1 339.546 -0.401 0.023
+west1 = StellarCluster('Westerlund_1', (339.546, -0.401), 0.023*60*2)
+
+cantatgaudin_clusters = {'Patchick_94': pat94, 'Westerlund_1': west1}
+
 # Empty regions (default values for position_angle=0 and separation_factor=5)
 e_m81a = EmptyRegion('e_m81a', m81)
 e_vdbh22a = EmptyRegion('e_vdbh22a', vdbh22)
@@ -53,7 +61,12 @@ e_cl86a = EmptyRegion('e_cl86a', cl86)
 e_cl74a = EmptyRegion('e_cl74a', cl74)
 e_cl88a = EmptyRegion('e_cl88a', cl88)
 
-empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22a, 'e_cl86a': e_cl86a,
-                                         'e_cl74a': e_cl74a, 'e_cl88a': e_cl88a}
+e_pat94 = EmptyRegion('e_pat94', pat94)
+e_west1 = EmptyRegion('e_west1', west1)
 
-all_regions = {**known_clusters, **empty_regions_close_to_known_clusters}
+empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22a, 'e_cl86a': e_cl86a,
+                                         'e_cl74a': e_cl74a, 'e_cl88a': e_cl88a, 'e_pat94': e_pat94,
+                                         'e_west1': e_west1}
+
+# A dictionary with all the regions
+all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **cantatgaudin_clusters}
