@@ -61,12 +61,12 @@ e_cl86a = EmptyRegion('e_cl86a', cl86)
 e_cl74a = EmptyRegion('e_cl74a', cl74)
 e_cl88a = EmptyRegion('e_cl88a', cl88)
 
-e_pat94 = EmptyRegion('e_pat94', pat94)
-e_west1 = EmptyRegion('e_west1', west1)
+e_pat94a = EmptyRegion('e_pat94', pat94)
+e_west1a = EmptyRegion('e_west1', west1)
 
 empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22a, 'e_cl86a': e_cl86a,
-                                         'e_cl74a': e_cl74a, 'e_cl88a': e_cl88a, 'e_pat94': e_pat94,
-                                         'e_west1': e_west1}
+                                         'e_cl74a': e_cl74a, 'e_cl88a': e_cl88a, 'e_pat94': e_pat94a,
+                                         'e_west1': e_west1a}
 
 # A dictionary with all the regions
 all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **cantatgaudin_clusters}

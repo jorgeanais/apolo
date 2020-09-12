@@ -53,3 +53,42 @@ def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir
                       cluster_selection_method=cluster_selection_method)
 
     cplots.plot_clustered_data(tile_region, out_dir, summarized_scores)
+
+
+def simple_clustering_routine(region_of_interest, tile, min_cluster_size, min_samples,
+                              space_param='Phot+PM',
+                              data_dir=dirconfig.cross_vvv_2mass_combis_gaia,
+                              out_dir=dirconfig.test_knowncl,
+                              cluster_selection_method='leaf'):
+    """
+    This routine take a cluster object and a tile to perform a clustering using provided hyper-parameters (mcs, ms, csm)
+    and using data in defined datadir directory
+
+    Parameters
+    ----------
+    region_of_interest
+    tile
+    min_cluster_size
+    min_samples
+    space_param
+    data_dir
+    out_dir
+    cluster_selection_method
+
+    Returns
+    -------
+
+    """
+
+    print(region_of_interest, tile)
+    catalog_file = tile.get_file(data_dir)
+    tile_region = setup_region(catalog_file, region_of_interest, times=2.0)
+
+    ctools.do_hdbscan(tile_region,
+                      space_param=space_param,
+                      cols=None,
+                      min_cluster_size=min_cluster_size,
+                      min_samples=min_samples,
+                      cluster_selection_method=cluster_selection_method)
+
+    cplots.plot_clustered_data(tile_region, out_dir)
