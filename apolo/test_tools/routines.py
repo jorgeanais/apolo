@@ -87,8 +87,8 @@ def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_sampl
     ctools.do_hdbscan(tile_region,
                       space_param=space_param,
                       cols=None,
-                      min_cluster_size=min_cluster_size,
-                      min_samples=min_samples,
+                      min_cluster_size=int(min_cluster_size),
+                      min_samples=int(min_samples),
                       cluster_selection_method=cluster_selection_method)
 
     cplots.plot_clustered_data(tile_region, out_dir)

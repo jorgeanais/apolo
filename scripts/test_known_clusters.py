@@ -5,6 +5,7 @@ from apolo.data import dirconfig, objects
 import multiprocessing as mp
 from os import path
 from apolo.catalog_proc.utils import make_dir
+import numpy as np
 
 """
 This script shows how 'clustering' is performed according to our current methodology. 
@@ -49,7 +50,6 @@ models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_
 with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(clustering_routine, models)
 
-
 # -------------------------------------------------------------------------------------------------------------------
 # VVV 2MASS COMBIS GAIA
 
@@ -72,12 +72,15 @@ data_dir = dirconfig.cross_vvv_2mass_combis_gaia
 out_dir = path.join(dirconfig.test_knowncl, 'test_names')
 make_dir(out_dir)
 
-mcs = 10
-ms = 10
+mcs_values = np.arange(5, 36, 1)
+ms_values = np.arange(5, 10, 1)
 space_params = ['Phot+PM', 'PhotOnly', 'lb+colors', 'lbQ', 'Colors+PM', 'All-in', 'Mini', 'Mini-alternative']
 
 # This line setup the arguments for function clustering_routine
-models = [(cl, tile, mcs, ms, sp, data_dir, out_dir) for cl, tile in zip(object_list, tiles) for sp in space_params]
+models = [(cl, tile, mcs, ms, sp, data_dir, out_dir)
+          for cl, tile in zip(object_list, tiles)
+          for sp in space_params
+          for mcs, ms in zip(mcs_values, mcs_values)]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
 # and passing the arguments `models`,
