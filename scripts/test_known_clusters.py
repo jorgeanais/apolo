@@ -1,5 +1,5 @@
 from apolo.catalog_proc import utils
-from apolo.test_tools.routines import clustering_routine, simple_clustering_routine
+from apolo.test_tools.routines import clustering_routine, fix_hyperparms_routine
 from apolo.test_tools.utils import which_tile
 from apolo.data import dirconfig, objects
 import multiprocessing as mp
@@ -28,7 +28,7 @@ object_list = [objects.m81, objects.cl86, objects.cl74, objects.cl88, objects.pa
 tiles = which_tile(object_list, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: 'Phot+PM', 'Colors+PM', 'All-in' 'Mini'
-space_param = 'Mini'
+space_param = 'Phot+PM'
 
 # -------------------------------------------------------------------------------------------------------------------
 # VVV COMBIS GAIA
@@ -54,7 +54,7 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
 # VVV 2MASS COMBIS GAIA
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia_Mini')
+out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia_Mini-alternative')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
@@ -66,19 +66,23 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(clustering_routine, models)
 
 # -------------------------------------------------------------------------------------------------------------------
-# VVV 2MASS COMBIS GAIA using single hyper-paramters
+# VVV 2MASS COMBIS GAIA using given hyper-paramters
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'vvv_2mass_combis_gaia_Color+PM')
+out_dir = path.join(dirconfig.test_knowncl, 'test_names')
 make_dir(out_dir)
 
+mcs = 10
+ms = 10
+space_params = ['Phot+PM', 'PhotOnly', 'lb+colors', 'lbQ', 'Colors+PM', 'All-in', 'Mini', 'Mini-alternative']
+
 # This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
+models = [(cl, tile, mcs, ms, sp, data_dir, out_dir) for cl, tile in zip(object_list, tiles) for sp in space_params]
 
 # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
 # and passing the arguments `models`,
 with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.starmap(simple_clustering_routine, models)
+    pool.starmap(fix_hyperparms_routine, models)
 
 # -------------------------------------------------------------------------------------------------------------------
 # COMBIS* GAIA

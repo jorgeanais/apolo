@@ -70,6 +70,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
             properties['MCS'] = table.meta['MCS']
             properties['MS'] = table.meta['MS']
             properties['CSM'] = table.meta['CSELMTD']
+            properties['SP'] = table.meta['SPARAMS']
             properties['FILE'] = path.basename(table.meta['FILE'])
         else:
             superior_title += 'No metadata available'
@@ -179,6 +180,10 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
         filename_base = object_name
     else:
         filename_base = str(time.time())
+
+    # Add hyper-parameters to the filename
+    if 'SPARAMS' and 'MCS' and 'MS' and 'CSELMTD' in table.meta:
+        filename_base = f"{filename_base}_{table.meta['SPARAMS']}_{table.meta['MCS']:1.0f}_{table.meta['MS']:1.0f}_{table.meta['CSELMTD']}"
 
     # Save plot as .png image
     filename_plot = path.join(output_dir, filename_base + '.png')
