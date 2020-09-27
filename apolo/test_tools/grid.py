@@ -13,7 +13,8 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
     Silhouette score. This number tells you how good is the clustering, also it
     returns the number of cluster detected for each combination of parameters.
     It returns an astropy-table with the results in order from best to worst.
-    clsm param is the cluster selection method for hdbscan
+    clsm param is the cluster selection method for hdbscan.
+    If noise_cluser is True, noise sources are not considered in the quality clustering score.
     """
 
     mcs_min, mcs_max = mcs_range

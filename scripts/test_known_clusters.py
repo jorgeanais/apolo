@@ -30,7 +30,7 @@ object_list = [objects.m81, objects.cl86, objects.cl74]
 tiles = which_tile(object_list, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: 'Phot+PM', 'Colors+PM', 'All-in' 'Mini'
-space_param = 'Mini-alternative'
+space_param = 'Phot+PM'
 
 # -------------------------------------------------------------------------------------------------------------------
 # VVV COMBIS GAIA
@@ -55,7 +55,7 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
 # VVV 2MASS COMBIS GAIA
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'Mini-alternative')
+out_dir = path.join(dirconfig.test_knowncl, space_param)
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine
