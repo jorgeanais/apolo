@@ -23,14 +23,14 @@ utils.check_base_data_structure()
 #     clusters = [objects.m81, objects.cl86, objects.cl74, objects.cl88]
 #     which_tile(clusters, objects.all_tiles)
 
-object_list = [objects.m81, objects.cl86, objects.cl74, objects.pat94, objects.west1]
+object_list = [objects.m81, objects.cl86, objects.cl74]
 # object_list = [objects.m81, objects.cl86, objects.cl74, objects.cl88, objects.pat94, objects.west1,
 # objects.e_m81a, objects.e_cl86a, objects.e_cl74a, objects.e_cl88a, objects.e_pat94a, objects.e_west1a]
 
 tiles = which_tile(object_list, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: 'Phot+PM', 'Colors+PM', 'All-in' 'Mini'
-space_param = 'Phot+PM'
+space_param = 'Mini-alternative'
 
 # -------------------------------------------------------------------------------------------------------------------
 # VVV COMBIS GAIA
@@ -55,7 +55,7 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
 # VVV 2MASS COMBIS GAIA
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'Phot+PM')
+out_dir = path.join(dirconfig.test_knowncl, 'Mini-alternative')
 make_dir(out_dir)
 
 # This line setup the arguments for function clustering_routine

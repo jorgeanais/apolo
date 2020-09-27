@@ -5,7 +5,8 @@ from sklearn import metrics
 
 
 def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
-                       space_param='Phot+PM', cols=None, cluster_selection_method='leaf'):
+                       space_param='Phot+PM', cols=None, cluster_selection_method='leaf',
+                       noise_cluster=True):
     """
     This function perform the clustering algorithm in a 'small' region of the data
     where we know before hand that exists a cluster. It returns the values of the
@@ -35,6 +36,12 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
                                             cluster_selection_method=cluster_selection_method)
 
         n_cluster = clusterer.labels_.max() + 2
+
+        if noise_cluster:
+            not_noise = np.where(clusterer.labels_ != -1)
+            data = data[not_noise]
+            clusterer.labels_ = clusterer.labels_[not_noise]
+
         if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
             r = [mcs, ms, n_cluster, score]
@@ -63,7 +70,6 @@ def perform_kounkel_grid_score(input_table, range_params=(5, 16), step=1, space_
 
     results = Table(names=('mcs', 'ms', 'n_clusters', 'score'))
 
-    # TODO: do the grid computation in parallel
     for param_value in grid_of_params:
         copy_table = input_table.copy()
         data, clusterer = ctools.do_hdbscan(copy_table, space_param=space_param,
@@ -93,7 +99,7 @@ def summarize_score(score_table):
     ms and mcs ranges for a single score value.
     Parameters
     ----------
-    score_file: str, path to a ecsv file with the scores
+    score_table:
 
     Returns
     -------
@@ -103,13 +109,11 @@ def summarize_score(score_table):
 
     score_table.sort(['score', 'ms', 'mcs'], reverse=True)
 
-    table_len = len(score_table)
     unique_score_values, count_unique_score_values = np.unique(score_table['score'], return_counts=True)
     unique_score_values = unique_score_values[::-1]
     count_unique_score_values = count_unique_score_values[::-1]
 
     degeneracy_table = Table(names=('score', 'ms', 'mcs_start', 'mcs_end', 'level_degeneracy', 'n_clusters'))
-    row = []
     index_score_start = 0
     for score, count_score in zip(unique_score_values, count_unique_score_values):
         index_score_end = index_score_start + count_score

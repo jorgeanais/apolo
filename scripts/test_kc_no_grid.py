@@ -43,6 +43,34 @@ with mp.Pool(mp.cpu_count() - 1) as pool:
     pool.starmap(fix_hyperparms_routine, models)
 
 # -------------------------------------------------------------------------------------------------------------------
+# (2) VVV 2MASS COMBIS GAIA using fixed hyper-paramters but different param-space for all clusters
+
+# Fixed hiper-params,
+# Cluster selection method is leaf by default
+mcs = 5
+ms = 20
+
+data_dir = dirconfig.cross_vvv_2mass_combis_gaia
+out_dir = path.join(dirconfig.test_knowncl, f'2_fixed_hiperparams_cl86_mcs{mcs}_ms{ms}')
+make_dir(out_dir)
+
+object_list = [objects.cl86]
+tiles = which_tile(object_list, objects.all_tiles)
+
+space_params = ['Phot+PM', 'Colors+PM', 'All-in', 'Mini', 'Mini-alternative']
+
+
+# This line setup the arguments for function clustering_routine
+models = [(cl, tile, mcs, ms, sp, data_dir, out_dir)
+          for cl, tile in zip(object_list, tiles)
+          for sp in space_params]
+
+# Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
+# and passing the arguments `models`,
+with mp.Pool(mp.cpu_count() - 1) as pool:
+    pool.starmap(fix_hyperparms_routine, models)
+
+# -------------------------------------------------------------------------------------------------------------------
 # VVV 2MASS COMBIS GAIA using small hyper-paramters range
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia

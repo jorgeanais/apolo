@@ -21,10 +21,10 @@ region = utils.setup_region(catalog_file, stellar_cluster, times=2.0)  # Only a 
 
 # Perform HDBSCAN clustering algorithm. This function update region table adding two columns: label and probabilities
 # and adds metadata relative to the clustering itself.
-ctools.do_hdbscan(region, space_param='Phot+PM',  # 'Phot+PM' 'Colors+PM'
-                  min_cluster_size=5,
-                  min_samples=13,
-                  cluster_selection_method='leaf')
+data, clusterer = ctools.do_hdbscan(region, space_param='Phot+PM',  # 'Phot+PM' 'Colors+PM'
+                                    min_cluster_size=5,
+                                    min_samples=13,
+                                    cluster_selection_method='leaf')
 
 # This function produces multiple plots to help to visualize data. Also it saves the results of the clustering
 # in a fits file.
