@@ -2,7 +2,7 @@ from os import path
 
 from apolo.clustering import cplots, ctools
 from apolo.data import dirconfig
-from apolo.test_tools.grid import perform_grid_score, perform_kounkel_grid_score, summarize_score
+from apolo.test_tools.grid import perform_grid_score, summarize_score
 from apolo.test_tools.utils import setup_region
 
 
@@ -33,7 +33,10 @@ def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir
                                 ms_range=(5, 100),
                                 space_param=space_param,
                                 cols=None,
-                                cluster_selection_method=cluster_selection_method)
+                                cluster_selection_method=cluster_selection_method,
+                                noise_cluster=True,
+                                make_plots=True,
+                                out_dir=out_dir)
 
     score_filepath = path.join(out_dir, 'scores_' + region_of_interest.name + '.ecsv')
     scores.write(score_filepath, format='ascii.ecsv')
@@ -52,7 +55,7 @@ def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir
                       min_samples=int(best_ms),
                       cluster_selection_method=cluster_selection_method)
 
-    cplots.plot_clustered_data(tile_region, out_dir, summarized_scores)
+    # cplots.plot_clustered_data(tile_region, out_dir, summarized_scores)
 
 
 def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_samples,

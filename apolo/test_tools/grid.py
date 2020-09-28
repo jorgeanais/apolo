@@ -1,12 +1,12 @@
 import numpy as np
 from astropy.table import Table
-from apolo.clustering import ctools
+from apolo.clustering import cplots, ctools
 from sklearn import metrics
 
 
 def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
                        space_param='Phot+PM', cols=None, cluster_selection_method='leaf',
-                       noise_cluster=True):
+                       noise_cluster=True, make_plots=False, out_dir=''):
     """
     This function perform the clustering algorithm in a 'small' region of the data
     where we know before hand that exists a cluster. It returns the values of the
@@ -47,6 +47,9 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
             r = [mcs, ms, n_cluster, score]
             results.add_row(r)
+            copy_table.meta.update({'SCORE': score})
+            if make_plots:
+                cplots.plot_clustered_data(copy_table, out_dir)
 
     results.sort(['score'], reverse=True)
 

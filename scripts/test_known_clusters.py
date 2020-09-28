@@ -29,54 +29,22 @@ object_list = [objects.m81, objects.cl86, objects.cl74]
 
 tiles = which_tile(object_list, objects.all_tiles)
 
-# Define which parameter space do you want to use from the available presets: 'Phot+PM', 'Colors+PM', 'All-in' 'Mini'
-space_param = 'Phot+PM'
+# Define which parameter space do you want to use from the available presets: 'Phot+PM', 'Colors+PM', 'All-in' 'Mini', 'Mini-alternative'
 
-# -------------------------------------------------------------------------------------------------------------------
-# VVV COMBIS GAIA
-# Select which set of parameter do you want to use. Check apolo/data/dirconfig to have a complete list. For example
-# - dirconfig.proc_vvv (only Javier photometry, do not include proper motions)
-# - dirconfig.cross_vvv_gaia (only Javier photometry but cleaned used gaia)
-# - dirconfig.cross_vvv_combis_gaia (This set includes Javier's photometry, pm from combis and cleaned using gaia)
-# - dirconfig.cross_vvv_2mass_combis_gaia (This set includes vvv extended with 2mass, pm and cleaned using gaia)
-data_dir = dirconfig.cross_vvv_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'vvv_combis_gaia/')
-make_dir(out_dir)
+space_params = ['Phot+PM', 'Colors+PM', 'All-in' 'Mini', 'Mini-alternative']
 
-# This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
+for space_param in space_params:
 
-# Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
-# and passing the arguments `models`,
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.starmap(clustering_routine, models)
+    # VVV 2MASS COMBIS GAIA
+    data_dir = dirconfig.cross_vvv_2mass_combis_gaia
+    out_dir = path.join(dirconfig.test_knowncl, space_param)
+    make_dir(out_dir)
 
-# -------------------------------------------------------------------------------------------------------------------
-# VVV 2MASS COMBIS GAIA
+    # This line setup the arguments for function clustering_routine
+    models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
 
-data_dir = dirconfig.cross_vvv_2mass_combis_gaia
-out_dir = path.join(dirconfig.test_knowncl, space_param)
-make_dir(out_dir)
+    # Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
+    # and passing the arguments `models`,
+    with mp.Pool(mp.cpu_count() - 1) as pool:
+        pool.starmap(clustering_routine, models)
 
-# This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
-
-# Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
-# and passing the arguments `models`,
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.starmap(clustering_routine, models)
-
-# -------------------------------------------------------------------------------------------------------------------
-# COMBIS* GAIA
-
-data_dir = dirconfig.cross_combisphot_gaia
-out_dir = path.join(dirconfig.test_knowncl, 'combis_gaia/')
-make_dir(out_dir)
-
-# This line setup the arguments for function clustering_routine
-models = [(cl, tile, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]
-
-# Computation in parallel. Here we are calling clustering_routine function (in polo/clustering/ctools/ directory)
-# and passing the arguments `models`
-with mp.Pool(mp.cpu_count() - 1) as pool:
-    pool.starmap(clustering_routine, models)
