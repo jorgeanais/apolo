@@ -73,6 +73,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
             properties['SP'] = table.meta['SPARAMS']
             if 'SCORE' in table.meta:
                 properties['SCORE'] = round(table.meta['SCORE'], 5)
+            if 'CH_SCORE' in table.meta:
+                properties['CH_SCORE'] = round(table.meta['CH_SCORE'], 5)
             properties['FILE'] = path.basename(table.meta['FILE'])
         else:
             superior_title += 'No metadata available'

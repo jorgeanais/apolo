@@ -25,7 +25,7 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
     r_min_samples = np.arange(ms_min, ms_max, step)
     grid_of_params = ((mcs, ms) for mcs in r_min_cluster_size for ms in r_min_samples)
 
-    results = Table(names=('mcs', 'ms', 'n_clusters', 'score'))
+    results = Table(names=('mcs', 'ms', 'n_clusters', 'score', 'ch_score'))
 
     for mcs, ms in grid_of_params:
         copy_table = input_table.copy()
@@ -45,9 +45,11 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
 
         if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
-            r = [mcs, ms, n_cluster, score]
+            ch_score = metrics.calinski_harabasz_score(data, clusterer.labels_)
+            r = [mcs, ms, n_cluster, score, ch_score]
             results.add_row(r)
             copy_table.meta.update({'SCORE': score})
+            copy_table.meta.update({'CH_SCORE': ch_score})
             if make_plots:
                 cplots.plot_clustered_data(copy_table, out_dir)
 
