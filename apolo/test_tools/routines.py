@@ -29,13 +29,13 @@ def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir
     catalog_file = tile.get_file(data_dir)
     tile_region = setup_region(catalog_file, region_of_interest, times=2.0)
     scores = perform_grid_score(tile_region,
-                                mcs_range=(5, 100),
-                                ms_range=(5, 100),
+                                mcs_range=(5, 50),
+                                ms_range=(5, 50),
                                 space_param=space_param,
                                 cols=None,
                                 cluster_selection_method=cluster_selection_method,
-                                noise_cluster=True,
-                                make_plots=True,
+                                noise_cluster=False,
+                                make_plots=False,
                                 out_dir=out_dir)
 
     score_filepath = path.join(out_dir, 'scores_' + region_of_interest.name + '.ecsv')
@@ -55,7 +55,7 @@ def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir
                       min_samples=int(best_ms),
                       cluster_selection_method=cluster_selection_method)
 
-    # cplots.plot_clustered_data(tile_region, out_dir, summarized_scores)
+    cplots.plot_clustered_data(tile_region, out_dir, summarized_scores)
 
 
 def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_samples,

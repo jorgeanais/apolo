@@ -25,7 +25,7 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
     r_min_samples = np.arange(ms_min, ms_max, step)
     grid_of_params = ((mcs, ms) for mcs in r_min_cluster_size for ms in r_min_samples)
 
-    results = Table(names=('mcs', 'ms', 'n_clusters', 'score', 'ch_score'))
+    results = Table(names=('mcs', 'ms', 'n_clusters', 'score', 'min_score', 'max_score', 'ch_score'))
 
     for mcs, ms in grid_of_params:
         copy_table = input_table.copy()
@@ -45,10 +45,13 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
 
         if n_cluster > 1:
             score = metrics.silhouette_score(data, clusterer.labels_, metric='euclidean')
+            min_silhouette_value = np.min(metrics.silhouette_samples(data, clusterer.labels_, metric='euclidean'))
+            max_silhouette_value = np.max(metrics.silhouette_samples(data, clusterer.labels_, metric='euclidean'))
             ch_score = metrics.calinski_harabasz_score(data, clusterer.labels_)
-            r = [mcs, ms, n_cluster, score, ch_score]
+            r = [mcs, ms, n_cluster, score, min_silhouette_value, max_silhouette_value, ch_score]
             results.add_row(r)
             copy_table.meta.update({'SCORE': score})
+            copy_table.meta.update({'MAXSCORE': max_silhouette_value})
             copy_table.meta.update({'CH_SCORE': ch_score})
             if make_plots:
                 cplots.plot_clustered_data(copy_table, out_dir)

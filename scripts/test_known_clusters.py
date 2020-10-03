@@ -31,7 +31,7 @@ tiles = which_tile(object_list, objects.all_tiles)
 
 # Define which parameter space do you want to use from the available presets: 'Phot+PM', 'Colors+PM', 'All-in', 'Mini', 'Mini-alternative'
 
-space_params = ['All-in', 'Mini', 'Mini-alternative']
+space_params = ['Mini-alternative']
 
 for space_param in space_params:
 
