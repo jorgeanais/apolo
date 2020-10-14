@@ -6,7 +6,7 @@ from os import path
 import time
 
 """
-The purpose of this script is to measure how much time take process a complete tile
+The purpose of this script is to measure how much time take to process a complete tile
 using a grid of hyper-parameters
 """
 # '/home/jorge/Documents/DATA/test/neighbors/bigtile_with_tiling_v2.fits'  # 2048
