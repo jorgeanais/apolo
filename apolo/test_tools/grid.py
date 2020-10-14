@@ -2,11 +2,12 @@ import numpy as np
 from astropy.table import Table
 from apolo.clustering import cplots, ctools
 from sklearn import metrics
+from joblib import Memory
 
 
 def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
                        space_param='Phot+PM', cols=None, cluster_selection_method='leaf',
-                       noise_cluster=True, make_plots=False, out_dir=''):
+                       noise_cluster=True, make_plots=False, out_dir='', memory=Memory(location=None)):
     """
     This function perform the clustering algorithm in a 'small' region of the data
     where we know before hand that exists a cluster. It returns the values of the
@@ -23,7 +24,7 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
     # Make a grid of parameters
     r_min_cluster_size = np.arange(mcs_min, mcs_max, step)
     r_min_samples = np.arange(ms_min, ms_max, step)
-    grid_of_params = ((mcs, ms) for mcs in r_min_cluster_size for ms in r_min_samples)
+    grid_of_params = ((mcs, ms) for ms in r_min_samples for mcs in r_min_cluster_size)
 
     results = Table(names=('mcs', 'ms', 'n_clusters', 'score', 'min_score', 'max_score', 'ch_score'))
 
@@ -34,7 +35,8 @@ def perform_grid_score(input_table, mcs_range=(5, 16), ms_range=(5, 11), step=1,
                                             cols=cols,
                                             min_cluster_size=int(mcs),
                                             min_samples=int(ms),
-                                            cluster_selection_method=cluster_selection_method)
+                                            cluster_selection_method=cluster_selection_method,
+                                            memory=memory)
 
         n_cluster = clusterer.labels_.max() + 2
 
