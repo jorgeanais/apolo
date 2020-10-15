@@ -7,3 +7,5 @@ scikit-learn
 astroquery
 setuptools
 pyyaml
+scipy
+joblib
