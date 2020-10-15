@@ -68,6 +68,7 @@ DATA/
 │   └── vvv
 └── test
     └── known_clusters
+    └── tiling
 
 ```
 
@@ -97,7 +98,10 @@ In the `scripts` folder, there are some codes that demonstrate how use apolo:
 
 1. `script_proc.py`: It pre-process and match raw catalogs in order to be used by the clustering algorithm.
 2. `basic_clustering.py`: A simple example of clustering. All the parameters are set by hand.
-3. `test_known_clusters`: This script automatically perform our current methodology to a set of clusters in parallel.
+3. `test_known_clusters.pu`: This script automatically perform our current methodology to a set of clusters in parallel.
+4. `join_tiles.py`: It spatially merge all the catalogs in one (in order to avoid spatial cuts in our region of interest).
+5. `tiling.py`: It spatially separate the region of interest in tiles using a density-aware approach (to make it computationally approachable).
+
 
 
 
