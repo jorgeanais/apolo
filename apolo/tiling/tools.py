@@ -107,9 +107,12 @@ def kd_tree_tiling(table, leaf_size=10000, cols=('l', 'b')):
     # Make the kd-tree structure from the data
     kdt = cKDTree(x, leafsize=leaf_size)
 
-    # Extract respective tile number
+    # Extract respective tile number for each source
     indexes = extract_leaves_indices(kdt.tree)
-    n_tiles = np.max(indexes)
+    tiling = np.zeros(len(x), dtype=int)
+    for i, idx in enumerate(indexes):
+        tiling[idx] = i
 
     # Update table
-    table[f'tile_{n_tiles}'] = indexes
+    n_tiles = np.max(tiling) + 1
+    table[f'tile'] = tiling
