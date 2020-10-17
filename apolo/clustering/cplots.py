@@ -184,6 +184,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     # Create filename based on object-name or time if not provided
     if object_name:
         filename_base = object_name
+    elif 'TILENAME' in table.meta:
+        filename_base = table.meta['TILENAME']
     else:
         filename_base = str(time.time())
 

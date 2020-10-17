@@ -100,7 +100,7 @@ def do_hdbscan(table, space_param='Phot+PM', cols=None, **kargs):
     mcs = kargs['min_cluster_size']
     ms = kargs['min_samples']
     csm = kargs['cluster_selection_method']
-    print(f'{object_name} MCS: {mcs}  MS:{ms}  CSM:{csm}')
+    # print(f'{object_name} MCS: {mcs}  MS:{ms}  CSM:{csm}')
 
     # Clustering is done here
     clusterer = hdbscan.HDBSCAN(**kargs).fit(data)

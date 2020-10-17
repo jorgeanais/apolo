@@ -1,9 +1,10 @@
 from os import path
-
 from apolo.clustering import cplots, ctools
 from apolo.data import dirconfig
 from apolo.test_tools.grid import perform_grid_score, summarize_score
-from apolo.test_tools.utils import setup_region
+from apolo.test_tools.utils import setup_region, add_pseudocolor
+from apolo.catalog_proc.utils import read_fits_table, write_fits_table
+from glob import glob
 
 
 def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir=dirconfig.cross_vvv_2mass_combis_gaia,
@@ -95,3 +96,64 @@ def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_sampl
                       cluster_selection_method=cluster_selection_method)
 
     cplots.plot_clustered_data(tile_region, out_dir)
+
+
+def tile_routine(tile_file, output_dir, space_param='Mini-alternative',):
+    """
+    This function implement a routine to be used with separate tiles files, including read file, add pseudo-color
+    column,
+    Parameters
+    ----------
+    tile_file
+    output_dir
+
+    Returns
+    -------
+
+    """
+    table = read_fits_table(tile_file)
+    tile_name = path.splitext(path.basename(tile_file))[0]
+
+    # Check if file exists, if so return False
+    expected_filename = path.join(output_dir, tile_name)
+    if glob(expected_filename + '*'):
+        print(f'Tile {tile_name} already processed. Skipping...')
+        return False
+
+    table.meta.update({'FILE': path.basename(tile_file)})
+    table.meta.update({'TILENAME': tile_name})
+
+    print('Processing', tile_name)
+
+    add_pseudocolor(table, color_excess=1.8)
+    scores = perform_grid_score(table,
+                                mcs_range=(5, 50),
+                                ms_range=(5, 50),
+                                space_param=space_param,
+                                cols=None,
+                                cluster_selection_method='leaf',
+                                noise_cluster=False,
+                                make_plots=False,
+                                out_dir=output_dir)
+
+    score_filepath = path.join(output_dir, 'scores_' + tile_name + '.ecsv')
+    scores.write(score_filepath, format='ascii.ecsv')
+
+    summarized_scores = summarize_score(scores)
+    score_filepath = path.join(output_dir, 'summary_' + tile_name + '.ecsv')
+    summarized_scores.write(score_filepath, format='ascii.ecsv')
+
+    best_mcs = summarized_scores['mcs_start'][0]
+    best_ms = summarized_scores['ms'][0]
+
+    ctools.do_hdbscan(table,
+                      space_param=space_param,
+                      cols=None,
+                      min_cluster_size=int(best_mcs),
+                      min_samples=int(best_ms),
+                      cluster_selection_method='leaf')
+
+    cplots.plot_clustered_data(table, output_dir, summarized_scores)
+
+    return True
+
