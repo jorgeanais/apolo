@@ -5,11 +5,18 @@ from os import path
 from apolo.catalog_proc.utils import make_dir
 from apolo.test_tools import routines
 from datetime import datetime
+import os
 
 """
 This script perform in parallel a clustering over all the tiles using a grid of hyper-parameters and selecting the best 
 clustering according to the max. Silhouette score
 """
+
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 # Log_file
 with open('log.txt', 'a') as log:

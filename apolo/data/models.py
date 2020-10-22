@@ -3,6 +3,7 @@ from astropy import units as u
 import glob
 from os import path
 import re
+import numpy as np
 
 
 class StellarCluster:
@@ -113,4 +114,15 @@ class Tile:
 
         return files[0]
 
+
+class Tessera(Tile):
+    def __init__(self, name, lmin, lmax, bmin, bmax):
+        Tile.__init__(self, name, lmin, lmax, bmin, bmax)
+        self._delta_l = lmax - lmin
+        self._delta_b = bmin - bmax
+        self._area = (lmax - lmin) * (np.sin(bmax * np.pi / 180.0) - np.sin(bmin * np.pi / 180.0)) * 180.0 / np.pi
+
+    @property
+    def area(self):
+        return self._area
 

@@ -20,7 +20,7 @@ log_table = Table(names=('tile', 'n', 'l_min', 'l_max', 'b_min', 'b_max', 'area'
 for tile in range(n_tiles):
     tile_selection = table[table['tile'] == tile]
     print(f'tile_{tile:04d}.fits')
-    write_fits_table(tile_selection, path.join(dirconfig.test_tiling, f'tile_{i:04d}.fits'))
+    write_fits_table(tile_selection, path.join(dirconfig.test_tiling, f'tile_{tile:04d}.fits'))
     n = len(tile_selection)
     l_min, l_max = tile_selection['l'].min(), tile_selection['l'].max()
     b_min, b_max = tile_selection['b'].min(), tile_selection['b'].max()
