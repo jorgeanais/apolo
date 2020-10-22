@@ -1,5 +1,6 @@
 from apolo.data.models import StellarCluster, EmptyRegion, Tile, Tessera
 from astropy.table import Table
+from os import path
 
 
 """
@@ -49,7 +50,7 @@ cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 grumo = StellarCluster('grumo', (338.55523, -0.37652), 2.0) # TODO: delete
 grumo2 = StellarCluster('grumo2', (339.10056, 0.69916), 2.0) # TODO: delete
 
-known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88, 'VDBH22': vdbh22, 'grumo': grumo, 'grumo2': grumo2}
+known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88, 'VDBH22': vdbh22}
 
 # Cantat-Guadin et al. 2020 selection of clusters ---
 # Patchick_94 336.458 0.855 0.016
@@ -77,5 +78,6 @@ empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22
 all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **cantatgaudin_clusters}
 
 
-# Load all files
-# Table.read('')
+# Load all tessera objects
+tesserae = {int(row['tile']):Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+            for row in Table.read(path.join(path.dirname(__file__), 'log_tiling_2048.ecsv'), format='ascii.ecsv')}
