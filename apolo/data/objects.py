@@ -1,4 +1,6 @@
-from apolo.data.models import StellarCluster, Tile, EmptyRegion
+from apolo.data.models import StellarCluster, EmptyRegion, Tile, Tessera
+from astropy.table import Table
+
 
 """
 This module contains all the info about tiles and known cluster
@@ -75,3 +77,5 @@ empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22
 all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **cantatgaudin_clusters}
 
 
+# Load all files
+# Table.read('')
