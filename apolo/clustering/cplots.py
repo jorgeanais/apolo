@@ -3,7 +3,7 @@ import seaborn as sns
 import numpy as np
 from astropy import units as u
 from apolo.data import dirconfig, objects
-from apolo.data.objects import all_tiles, known_clusters
+from apolo.data.objects import known_clusters, tiles_search_area
 from apolo.catalog_proc.utils import write_fits_table
 from os import path
 import time
@@ -195,7 +195,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
 
     # Save plot as .png image
     filename_plot = path.join(output_dir, filename_base + '.png')
-    plt.savefig(filename_plot, format='png', overwrite=False)
+    plt.savefig(filename_plot, format='png')
     plt.clf()
 
     # Save table as fits
@@ -209,7 +209,7 @@ def make_plot_roi():
     :return:
     """
     plt.figure()
-    for k, t in all_tiles.items():
+    for k, t in tiles_search_area.items():
         left = t.lmin
         bottom = t.bmin
         width = t.lmax - t.lmin
@@ -224,8 +224,8 @@ def make_plot_roi():
         plt.plot(c.coord.l.deg, c.coord.b.deg, 'o')
         plt.text(c.coord.l.deg, c.coord.b.deg - 0.1, c.name, horizontalalignment='center', verticalalignment='center')
 
-    plt.xlim(351., 335)
+    plt.xlim(342., 335)
     plt.ylim(-1.3, 1.3)
-    plt.xlabel('Galactic Longitude (l), deg')
-    plt.ylabel('Galactic Latitude (b), deg')
+    plt.xlabel('Galactic Longitude (l), deg.')
+    plt.ylabel('Galactic Latitude (b), deg.')
     plt.show()
