@@ -6,6 +6,7 @@ from scipy.spatial import cKDTree
 from apolo.catalog_proc.utils import write_fits_table
 from apolo.data import dirconfig, models
 from os import path
+from astropy.table import Table
 
 
 def join_tiles(tbl_t1, tbl_t2, tolerance=0.34):
@@ -121,7 +122,8 @@ def kd_tree_tiling(table, leaf_size=10000, cols=('l', 'b')):
     table[f'tile'] = tiling
 
 
-def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=False, output_dir=dirconfig.test_tiling):
+def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=False, output_dir=dirconfig.test_tiling,
+                       log_table=Table(names=('tile', 'n', 'l_min', 'l_max', 'b_min', 'b_max', 'area'))):
     """
     This grid receives two numpy arrays with the limits of the grid in both coordinates (l, b)
     and produces the tiling over the astropytable given
@@ -134,6 +136,7 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
     partitioning_id: integer, used to identify tile partitioning from other partitioning
     write_fits: Boolean, gives the option to write the fits file to a output dir
     output_dir: string, path where fits files are saved.
+    log_table: An astropytable used as log
 
     Returns
     -------
@@ -161,10 +164,17 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
                 mask_bmax = table['b'] < b_max
                 mask = mask_lmin * mask_lmax * mask_bmin * mask_bmax
                 table_portion = table[mask]
+
                 write_fits_table(table_portion,
                                  path.join(output_dir, f'tile_bf{partitioning_id}_{tile_number:04d}.fits'))
 
+                # Log
+                area = (l_max - l_min) * (np.sin(b_max * np.pi / 180.0) - np.sin(b_min * np.pi / 180.0)) * 180.0 / np.pi
+                log_table.add_row([tile_number, len(table_portion), l_min, l_max, b_min, b_max, area])
+
             tile_number += 1
+
+    log_table.write(path.join(output_dir, f'log_tiling_bf{partitioning_id}'))
 
     tiles_objects_dict = dict()
     for t in tile_list:

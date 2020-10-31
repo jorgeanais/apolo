@@ -5,9 +5,11 @@ from os import path
 import numpy as np
 from apolo.clustering.cplots import make_plot_roi
 import matplotlib.pyplot as plt
+from astropy.table import Table
 
 
-def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=False, output_dir=dirconfig.test_tiling):
+def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=False, output_dir=dirconfig.test_tiling,
+                       log_table=Table(names=('tile', 'n', 'l_min', 'l_max', 'b_min', 'b_max', 'area'))):
     """
     This grid receives two numpy arrays with the limits of the grid in both coordinates (l, b)
     and produces the tiling over the astropytable given
@@ -20,6 +22,7 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
     partitioning_id: integer, used to identify tile partitioning from other partitioning
     write_fits: Boolean, gives the option to write the fits file to a output dir
     output_dir: string, path where fits files are saved.
+    log_table: An astropytable used as log
 
     Returns
     -------
@@ -47,10 +50,17 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
                 mask_bmax = table['b'] < b_max
                 mask = mask_lmin * mask_lmax * mask_bmin * mask_bmax
                 table_portion = table[mask]
+
                 write_fits_table(table_portion,
                                  path.join(output_dir, f'tile_bf{partitioning_id}_{tile_number:04d}.fits'))
 
+                # Log
+                area = (l_max - l_min) * (np.sin(b_max * np.pi / 180.0) - np.sin(b_min * np.pi / 180.0)) * 180.0 / np.pi
+                log_table.add_row([tile_number, len(table_portion), l_min, l_max, b_min, b_max, area])
+
             tile_number += 1
+
+    log_table.write(path.join(output_dir, f'log_tiling_bf{partitioning_id}'))
 
     tiles_objects_dict = dict()
     for t in tile_list:
@@ -94,7 +104,7 @@ tiles_3 = rectangular_tiling(table, l_grid_3, b_grid_3, 3)
 
 
 # This part produces some nice plots of the region of interest
-"""
+
 # Only search area
 plt.figure()
 rect = plt.Rectangle((l_min_roi, b_min_roi), l_max_roi - l_min_roi, b_max_roi - b_min_roi, fill=False, edgecolor='black')
@@ -104,13 +114,14 @@ plt.ylim(-1.3, 1.3)
 plt.xlabel('Galactic Longitude (l), deg.')
 plt.ylabel('Galactic Latitude (b), deg.')
 plt.show()
-"""
+
 
 # Individual plots
 # make_plot_roi(tiles_0)
 # make_plot_roi(tiles_1)
 # make_plot_roi(tiles_2)
 # make_plot_roi(tiles_3)
+
 
 # All tilings together
 tiling = [tiles_0, tiles_1, tiles_2, tiles_3]
@@ -135,3 +146,4 @@ plt.ylim(-1.3, 1.3)
 plt.xlabel('Galactic Longitude (l), deg.')
 plt.ylabel('Galactic Latitude (b), deg.')
 plt.show()
+
