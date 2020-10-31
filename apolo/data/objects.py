@@ -60,7 +60,7 @@ pat94 = StellarCluster('Patchick_94', (336.458, 0.855), 0.016 * 60 * 2)
 # Westerlund_1 339.546 -0.401 0.023
 west1 = StellarCluster('Westerlund_1', (339.546, -0.401), 0.023 * 60 * 2)
 
-cantatgaudin_clusters = {'Patchick_94': pat94, 'Westerlund_1': west1}
+# cantatgaudin_clusters = {'Patchick_94': pat94, 'Westerlund_1': west1}
 
 # Empty regions (default values for position_angle=0 and separation_factor=5)
 e_m81a = EmptyRegion('e_m81a', m81)
@@ -76,8 +76,6 @@ empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22
                                          'e_cl74a': e_cl74a, 'e_cl88a': e_cl88a, 'e_pat94': e_pat94a,
                                          'e_west1': e_west1a}
 
-# A dictionary with all the regions
-all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **cantatgaudin_clusters}
 
 # Load all tessera objects from file
 tesserae = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
@@ -89,3 +87,7 @@ tesserae_4096 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['
 # Load all Tristan objects from file
 tristan_clusters = {row['Cluster']: StellarCluster(row['Cluster'], (row['GLON'], row['GLAT']), row['r50'] * 60)
                     for row in Table.read(path.join(path.dirname(__file__), 'cantant2020_sel.csv'), format='csv')}
+
+
+# A dictionary with all the regions
+all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **tristan_clusters}

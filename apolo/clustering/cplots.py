@@ -203,7 +203,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     write_fits_table(table, filename_table)
 
 
-def make_plot_roi(dic_with_tiles=tiles_search_area):
+def make_plot_roi(dic_with_tiles=tiles_search_area, clusters=known_clusters):
     """
     Make plot of the region of interest including all the known clusters defined in `apolo/data/objects`.
     :return:
@@ -216,11 +216,11 @@ def make_plot_roi(dic_with_tiles=tiles_search_area):
         height = t.bmax - t.bmin
         rect = plt.Rectangle((left, bottom), width, height, fill=False, edgecolor='red')
         plt.gca().add_patch(rect)
-        plt.text(left + 0.5 * width, bottom + 0.5 * height, t.name,
-                 horizontalalignment='center', verticalalignment='center',
-                 color='red')
+        # plt.text(left + 0.5 * width, bottom + 0.5 * height, t.name,
+        #          horizontalalignment='center', verticalalignment='center',
+        #          color='red')
 
-    for k, c in known_clusters.items():
+    for k, c in clusters.items():
         plt.plot(c.coord.l.deg, c.coord.b.deg, 'o')
         plt.text(c.coord.l.deg, c.coord.b.deg - 0.1, c.name, horizontalalignment='center', verticalalignment='center')
 
