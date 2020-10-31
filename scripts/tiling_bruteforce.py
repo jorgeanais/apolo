@@ -7,6 +7,10 @@ from apolo.clustering.cplots import make_plot_roi
 import matplotlib.pyplot as plt
 from astropy.table import Table
 
+"""
+This script performs a spatial tiling over a catalog an produces as much files as tiles using brute-force approach
+(oversampling method).
+"""
 
 def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=False, output_dir=dirconfig.test_tiling,
                        log_table=Table(names=('tile', 'n', 'l_min', 'l_max', 'b_min', 'b_max', 'area'))):
