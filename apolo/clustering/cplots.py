@@ -203,13 +203,13 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     write_fits_table(table, filename_table)
 
 
-def make_plot_roi():
+def make_plot_roi(dic_with_tiles=tiles_search_area):
     """
     Make plot of the region of interest including all the known clusters defined in `apolo/data/objects`.
     :return:
     """
     plt.figure()
-    for k, t in tiles_search_area.items():
+    for k, t in dic_with_tiles.items():
         left = t.lmin
         bottom = t.bmin
         width = t.lmax - t.lmin

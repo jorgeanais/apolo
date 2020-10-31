@@ -2,7 +2,6 @@ from apolo.data.models import StellarCluster, EmptyRegion, Tile, Tessera
 from astropy.table import Table
 from os import path
 
-
 """
 This module contains all the info about tiles and known cluster
 """
@@ -50,8 +49,8 @@ cl86 = StellarCluster('VVVCL086', (340.0008, -0.2931), 1.17)
 cl74 = StellarCluster('VVVCL074', (336.3737, 0.1941), 1.1)
 cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 
-grumo = StellarCluster('grumo', (338.55523, -0.37652), 2.0) # TODO: delete
-grumo2 = StellarCluster('grumo2', (339.10056, 0.69916), 2.0) # TODO: delete
+grumo = StellarCluster('grumo', (338.55523, -0.37652), 2.0)  # TODO: delete
+grumo2 = StellarCluster('grumo2', (339.10056, 0.69916), 2.0)  # TODO: delete
 
 known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88}
 
@@ -59,7 +58,7 @@ known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVC
 # Patchick_94 336.458 0.855 0.016
 pat94 = StellarCluster('Patchick_94', (336.458, 0.855), 0.016 * 60 * 2)
 # Westerlund_1 339.546 -0.401 0.023
-west1 = StellarCluster('Westerlund_1', (339.546, -0.401), 0.023*60*2)
+west1 = StellarCluster('Westerlund_1', (339.546, -0.401), 0.023 * 60 * 2)
 
 cantatgaudin_clusters = {'Patchick_94': pat94, 'Westerlund_1': west1}
 
@@ -80,11 +79,13 @@ empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22
 # A dictionary with all the regions
 all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **cantatgaudin_clusters}
 
-
 # Load all tessera objects from file
-tesserae = {int(row['tile']):Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+tesserae = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
             for row in Table.read(path.join(path.dirname(__file__), 'log_tiling_2048.ecsv'), format='ascii.ecsv')}
 
+tesserae_4096 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+                 for row in Table.read(path.join(path.dirname(__file__), 'log_tiling_4096.ecsv'), format='ascii.ecsv')}
+
 # Load all Tristan objects from file
-tristan_clusters = {row['Cluster']:StellarCluster(row['Cluster'], (row['GLON'], row['GLAT']), row['r50'] * 60)
+tristan_clusters = {row['Cluster']: StellarCluster(row['Cluster'], (row['GLON'], row['GLAT']), row['r50'] * 60)
                     for row in Table.read(path.join(path.dirname(__file__), 'cantant2020_sel.csv'), format='csv')}

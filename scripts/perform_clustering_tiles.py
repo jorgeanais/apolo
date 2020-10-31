@@ -26,7 +26,7 @@ with open('log.txt', 'a') as log:
 tiles_dir = path.join(dirconfig.test_tiling)
 output_dir = path.join(tiles_dir, 'output')
 make_dir(output_dir)
-n_processes = 4
+n_processes = 1
 
 
 tile_files = glob.glob(tiles_dir + '/tile*.fits')
