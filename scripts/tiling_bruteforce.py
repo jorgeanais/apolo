@@ -1,8 +1,6 @@
 from apolo.catalog_proc.utils import read_fits_table, write_fits_table
 from apolo.data import dirconfig, models
-from apolo.tiling.tools import kd_tree_tiling
 from os import path
-from astropy.table import Table
 import numpy as np
 from apolo.clustering.cplots import make_plot_roi
 
