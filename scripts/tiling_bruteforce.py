@@ -1,6 +1,6 @@
 from apolo.catalog_proc.utils import read_fits_table, write_fits_table
 from apolo.data import dirconfig, models
-from apolo.data.objects import known_clusters, tristan_clusters
+from apolo.data.objects import known_clusters, tristan_clusters, tesserae_2048, tesserae_4096
 from os import path
 import numpy as np
 from apolo.clustering.cplots import make_plot_roi
@@ -60,7 +60,7 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
 
             tile_number += 1
 
-    log_table.write(path.join(output_dir, f'log_tiling_bf{partitioning_id}'))
+    log_table.write(path.join(output_dir, f'log_tiling_bf{partitioning_id}'), format='ascii.ecsv')
 
     tiles_objects_dict = dict()
     for t in tile_list:
@@ -117,10 +117,12 @@ plt.show()
 
 
 # Individual plots
-# make_plot_roi(tiles_0)
-# make_plot_roi(tiles_1)
-# make_plot_roi(tiles_2)
-# make_plot_roi(tiles_3)
+make_plot_roi(tiles_0, {**known_clusters, **tristan_clusters})
+make_plot_roi(tiles_1, {**known_clusters, **tristan_clusters})
+make_plot_roi(tiles_2, {**known_clusters, **tristan_clusters})
+make_plot_roi(tiles_3, {**known_clusters, **tristan_clusters})
+make_plot_roi(tesserae_2048, {**known_clusters, **tristan_clusters})
+make_plot_roi(tesserae_4096, {**known_clusters, **tristan_clusters})
 
 
 # All tilings together

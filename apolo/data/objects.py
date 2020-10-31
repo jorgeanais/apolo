@@ -78,7 +78,7 @@ empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22
 
 
 # Load all tessera objects from file
-tesserae = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+tesserae_2048 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
             for row in Table.read(path.join(path.dirname(__file__), 'log_tiling_2048.ecsv'), format='ascii.ecsv')}
 
 tesserae_4096 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
