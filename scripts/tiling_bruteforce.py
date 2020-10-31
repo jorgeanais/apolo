@@ -87,20 +87,30 @@ b_grid_2 = np.arange(b_min_roi - tile_size * 0.5, b_max_roi + tile_size * 0.5, t
 tiles_2 = rectangular_tiling(table, l_grid_2, b_grid_2, 2)
 
 # Grid aligned to the left top corner of the roi
-l_grid_3 = np.arange(l_min_roi- tile_size * 0.5, l_max_roi - tile_size * 0.5, tile_size)
+l_grid_3 = np.arange(l_min_roi - tile_size * 0.5, l_max_roi + tile_size * 0.5, tile_size)
 b_grid_3 = np.arange(b_min_roi - tile_size * 0.5, b_max_roi + tile_size * 0.5, tile_size)
 
 tiles_3 = rectangular_tiling(table, l_grid_3, b_grid_3, 3)
 
 
 # This part produces some nice plots of the region of interest
+"""
+# Only search area
+plt.figure()
+rect = plt.Rectangle((l_min_roi, b_min_roi), l_max_roi - l_min_roi, b_max_roi - b_min_roi, fill=False, edgecolor='black')
+plt.gca().add_patch(rect)
+plt.xlim(342., 335)
+plt.ylim(-1.3, 1.3)
+plt.xlabel('Galactic Longitude (l), deg.')
+plt.ylabel('Galactic Latitude (b), deg.')
+plt.show()
+"""
 
 # Individual plots
-make_plot_roi(tiles_1)
-make_plot_roi(tiles_1)
-make_plot_roi(tiles_1)
-make_plot_roi(tiles_1)
-
+# make_plot_roi(tiles_0)
+# make_plot_roi(tiles_1)
+# make_plot_roi(tiles_2)
+# make_plot_roi(tiles_3)
 
 # All tilings together
 tiling = [tiles_0, tiles_1, tiles_2, tiles_3]
