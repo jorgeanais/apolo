@@ -78,16 +78,30 @@ empty_regions_close_to_known_clusters = {'e_m81a': e_m81a, 'e_vdbh22a': e_vdbh22
 
 
 # Load all tessera objects from file
+tesserae_1024 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_1024.ecsv'), format='ascii.ecsv')}
+
 tesserae_2048 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
-            for row in Table.read(path.join(path.dirname(__file__), 'log_tiling_2048.ecsv'), format='ascii.ecsv')}
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_2048.ecsv'), format='ascii.ecsv')}
 
 tesserae_4096 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
-                 for row in Table.read(path.join(path.dirname(__file__), 'log_tiling_4096.ecsv'), format='ascii.ecsv')}
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_4096.ecsv'), format='ascii.ecsv')}
 
 # Load all Tristan objects from file
 tristan_clusters = {row['Cluster']: StellarCluster(row['Cluster'], (row['GLON'], row['GLAT']), row['r50'] * 60)
-                    for row in Table.read(path.join(path.dirname(__file__), 'cantant2020_sel.csv'), format='csv')}
+                    for row in Table.read(path.join(path.dirname(__file__), 'files/cantant2020_sel.csv'), format='csv')}
 
 
 # A dictionary with all the regions
 all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **tristan_clusters}
+
+# Load tessera objects from file
+
+tesserae_bf_1 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_bf1.ecsv'), format='ascii.ecsv')}
+
+tesserae_bf_2 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_bf2.ecsv'), format='ascii.ecsv')}
+
+tesserae_bf_3 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_bf3.ecsv'), format='ascii.ecsv')}

@@ -15,3 +15,37 @@ for cl in objects.tristan_clusters.values():
     for t in objects.tesserae_4096.values():
         if t.contains(cl):
             print(cl.name, cl.coord, t.name)
+
+# ------------
+
+cl = objects.cl86
+for t in objects.tesserae_1024.values():
+    if t.contains(cl):
+        print(cl.name, cl.coord, t.name)
+        break
+
+for t in objects.tesserae_2048.values():
+    if t.contains(cl):
+        print(cl.name, cl.coord, t.name)
+        break
+
+
+for t in objects.tesserae_4096.values():
+    if t.contains(cl):
+        print(cl.name, cl.coord, t.name)
+        break
+
+for t in objects.tesserae_bf_1.values():
+    if t.contains(cl):
+        print(cl.name, cl.coord, t.name)
+        break
+
+for t in objects.tesserae_bf_2.values():
+    if t.contains(cl):
+        print(cl.name, cl.coord, t.name)
+        break
+
+for t in objects.tesserae_bf_3.values():
+    if t.contains(cl):
+        print(cl.name, cl.coord, t.name)
+        break

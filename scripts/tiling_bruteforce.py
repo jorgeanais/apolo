@@ -1,6 +1,6 @@
 from apolo.catalog_proc.utils import read_fits_table, write_fits_table
 from apolo.data import dirconfig, models
-from apolo.data.objects import known_clusters, tristan_clusters, tesserae_2048, tesserae_4096
+from apolo.data.objects import known_clusters, tristan_clusters, tesserae_1024, tesserae_2048, tesserae_4096
 from os import path
 import numpy as np
 from apolo.clustering.cplots import make_plot_roi
@@ -11,6 +11,7 @@ from astropy.table import Table
 This script performs a spatial tiling over a catalog an produces as much files as tiles using brute-force approach
 (oversampling method).
 """
+
 
 def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=False, output_dir=dirconfig.test_tiling,
                        log_table=Table(names=('tile', 'n', 'l_min', 'l_max', 'b_min', 'b_max', 'area'))):
@@ -55,8 +56,8 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
                 mask = mask_lmin * mask_lmax * mask_bmin * mask_bmax
                 table_portion = table[mask]
 
-                write_fits_table(table_portion,
-                                 path.join(output_dir, f'tile_bf{partitioning_id}_{tile_number:04d}.fits'))
+                # write_fits_table(table_portion,
+                #                 path.join(output_dir, f'tile_bf{partitioning_id}_{tile_number:04d}.fits'))
 
                 # Log
                 area = (l_max - l_min) * (np.sin(b_max * np.pi / 180.0) - np.sin(b_min * np.pi / 180.0)) * 180.0 / np.pi
@@ -65,11 +66,11 @@ def rectangular_tiling(table, l_grid, b_grid, partitioning_id=0, write_fits=Fals
             tile_number += 1
 
     if write_fits:
-        log_table.write(path.join(output_dir, f'log_tiling_bf{partitioning_id}'), format='ascii.ecsv')
+        log_table.write(path.join(output_dir, f'log_tiling_bf{partitioning_id}.ecsv'), format='ascii.ecsv')
 
     tiles_objects_dict = dict()
     for t in tile_list:
-        tiles_objects_dict.update({t[0]: models.Tile(*t)})
+        tiles_objects_dict.update({t[0]: models.Tessera(*t)})
 
     return tiles_objects_dict
 
@@ -87,7 +88,7 @@ tile_size = 4.0 / 60  # tiles of 4 arcmin (deg)
 l_grid_0 = np.arange(l_min_roi, l_max_roi + tile_size, tile_size)
 b_grid_0 = np.arange(b_min_roi, b_max_roi + tile_size, tile_size)
 
-tiles_0 = rectangular_tiling(table, l_grid_0, b_grid_0, 0)
+tiles_0 = rectangular_tiling(table, l_grid_0, b_grid_0, 0, True)
 
 # Grid aligned to the left top corner of the roi
 l_grid_1 = np.arange(l_min_roi - tile_size * 0.5, l_max_roi + tile_size * 0.5, tile_size)
@@ -107,12 +108,12 @@ b_grid_3 = np.arange(b_min_roi - tile_size * 0.5, b_max_roi + tile_size * 0.5, t
 
 tiles_3 = rectangular_tiling(table, l_grid_3, b_grid_3, 3)
 
-
 # This part produces some nice plots of the region of interest
 
 # Only search area
 plt.figure()
-rect = plt.Rectangle((l_min_roi, b_min_roi), l_max_roi - l_min_roi, b_max_roi - b_min_roi, fill=False, edgecolor='black')
+rect = plt.Rectangle((l_min_roi, b_min_roi), l_max_roi - l_min_roi, b_max_roi - b_min_roi, fill=False,
+                     edgecolor='black')
 plt.gca().add_patch(rect)
 plt.xlim(342., 335)
 plt.ylim(-1.3, 1.3)
@@ -120,15 +121,14 @@ plt.xlabel('Galactic Longitude (l), deg.')
 plt.ylabel('Galactic Latitude (b), deg.')
 plt.show()
 
-
 # Individual plots
 make_plot_roi(tiles_0, {**known_clusters, **tristan_clusters})
 make_plot_roi(tiles_1, {**known_clusters, **tristan_clusters})
 make_plot_roi(tiles_2, {**known_clusters, **tristan_clusters})
 make_plot_roi(tiles_3, {**known_clusters, **tristan_clusters})
+make_plot_roi(tesserae_1024, {**known_clusters, **tristan_clusters})
 make_plot_roi(tesserae_2048, {**known_clusters, **tristan_clusters})
 make_plot_roi(tesserae_4096, {**known_clusters, **tristan_clusters})
-
 
 # All tilings together
 tiling = [tiles_0, tiles_1, tiles_2, tiles_3]
@@ -143,14 +143,15 @@ for til, col in zip(tiling, colors):
         height = t.bmax - t.bmin
         rect = plt.Rectangle((left, bottom), width, height, fill=False, edgecolor=col)
         plt.gca().add_patch(rect)
-rect = plt.Rectangle((l_min_roi, b_min_roi), l_max_roi - l_min_roi, b_max_roi - b_min_roi, fill=False, edgecolor='black')
+rect = plt.Rectangle((l_min_roi, b_min_roi), l_max_roi - l_min_roi, b_max_roi - b_min_roi, fill=False,
+                     edgecolor='black')
 plt.gca().add_patch(rect)
 for clust in {**known_clusters, **tristan_clusters}.values():
     plt.plot(clust.coord.l.deg, clust.coord.b.deg, 'o')
-    plt.text(clust.coord.l.deg, clust.coord.b.deg - 0.1, clust.name, horizontalalignment='center', verticalalignment='center')
+    plt.text(clust.coord.l.deg, clust.coord.b.deg - 0.1, clust.name, horizontalalignment='center',
+             verticalalignment='center')
 plt.xlim(342., 335)
 plt.ylim(-1.3, 1.3)
 plt.xlabel('Galactic Longitude (l), deg.')
 plt.ylabel('Galactic Latitude (b), deg.')
 plt.show()
-
