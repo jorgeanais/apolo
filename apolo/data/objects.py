@@ -97,6 +97,9 @@ all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **tris
 
 # Load tessera objects from file
 
+tesserae_bf_0 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
+                 for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_bf0.ecsv'), format='ascii.ecsv')}
+
 tesserae_bf_1 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
                  for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_bf1.ecsv'), format='ascii.ecsv')}
 
