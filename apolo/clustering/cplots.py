@@ -105,7 +105,7 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     plt.suptitle(superior_title, fontsize='large')
 
     # l b
-    plt.subplot(231)
+    ax1 = plt.subplot(231)
     plt.xlabel('l, deg', fontweight='bold')
     plt.ylabel('b, deg', fontweight='bold')
     plt.scatter(noise['l'], noise['b'], c=noise['color'], **kargs_noise)
@@ -124,6 +124,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
         x1 = r * np.cos(theta) + l_cluster
         x2 = r * np.sin(theta) + b_cluster
         plt.plot(x1, x2, color=(0, .7, 0))
+
+    ax1.set_aspect('equal')
 
     # J-H vs H-Ks
     plt.subplot(232)
@@ -203,7 +205,8 @@ def plot_clustered_data(table, output_dir=dirconfig.test_knowncl, summarized_sco
     write_fits_table(table, filename_table)
 
 
-def make_plot_roi(dic_with_tiles=tiles_search_area, clusters=known_clusters):
+def make_plot_roi(dic_with_tiles=tiles_search_area, clusters=known_clusters,
+                  edgecolor='gray', annotation=False):
     """
     Make plot of the region of interest including all the known clusters defined in `apolo/data/objects`.
     :return:
@@ -214,11 +217,12 @@ def make_plot_roi(dic_with_tiles=tiles_search_area, clusters=known_clusters):
         bottom = t.bmin
         width = t.lmax - t.lmin
         height = t.bmax - t.bmin
-        rect = plt.Rectangle((left, bottom), width, height, fill=False, edgecolor='red')
+        rect = plt.Rectangle((left, bottom), width, height, fill=False, edgecolor=edgecolor)
         plt.gca().add_patch(rect)
-        # plt.text(left + 0.5 * width, bottom + 0.5 * height, t.name,
-        #          horizontalalignment='center', verticalalignment='center',
-        #          color='red')
+        if annotation:
+            plt.text(left + 0.5 * width, bottom + 0.5 * height, t.name,
+                     horizontalalignment='center', verticalalignment='center',
+                     color='red')
 
     for k, c in clusters.items():
         plt.plot(c.coord.l.deg, c.coord.b.deg, 'o')

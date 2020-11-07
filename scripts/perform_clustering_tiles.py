@@ -29,7 +29,7 @@ n_processes = 4
 
 
 tile_files = glob.glob(tiles_dir + '/tile_bf*.fits')
-tile_files.sort()
+# tile_files.sort()
 
 # Test ----
 # tile_file = '/home/jorge/Documents/DATA/test/tiling/tile_0944.fits'

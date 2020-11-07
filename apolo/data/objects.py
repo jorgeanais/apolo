@@ -52,7 +52,7 @@ cl88 = StellarCluster('VVVCL088', (341.1292, -0.3465), 1.0)
 grumo = StellarCluster('grumo', (338.55523, -0.37652), 2.0)  # TODO: delete
 grumo2 = StellarCluster('grumo2', (339.10056, 0.69916), 2.0)  # TODO: delete
 
-known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74, 'VVVCL088': cl88}
+known_clusters = {'[MCM2005b]81': m81, 'VVVCL086': cl86, 'VVVCL074': cl74}
 
 # Cantat-Guadin et al. 2020 selection of clusters ---
 # Patchick_94 336.458 0.855 0.016

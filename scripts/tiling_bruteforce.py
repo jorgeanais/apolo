@@ -128,7 +128,9 @@ make_plot_roi(tiles_2, {**known_clusters, **tristan_clusters})
 make_plot_roi(tiles_3, {**known_clusters, **tristan_clusters})
 make_plot_roi(tesserae_1024, {**known_clusters, **tristan_clusters})
 make_plot_roi(tesserae_2048, {**known_clusters, **tristan_clusters})
+make_plot_roi(tesserae_2048, {})
 make_plot_roi(tesserae_4096, {**known_clusters, **tristan_clusters})
+make_plot_roi(edgecolor='red', annotation=True)
 
 # All tilings together
 tiling = [tiles_0, tiles_1, tiles_2, tiles_3]
