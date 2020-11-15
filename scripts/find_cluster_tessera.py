@@ -42,3 +42,59 @@ for bf in [objects.tesserae_bf_0, objects.tesserae_bf_1, objects.tesserae_bf_2, 
             print(cl.name, cl.coord, t.name)
             break
 
+
+# -------------
+
+cluster_tiles = dict()
+for cl in objects.known_clusters.values():
+    for t in objects.tesserae_bf_0.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+
+for cl in objects.tristan_clusters.values():
+    for t in objects.tesserae_bf_0.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+
+for cl in objects.known_clusters.values():
+    for t in objects.tesserae_bf_1.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+
+for cl in objects.tristan_clusters.values():
+    for t in objects.tesserae_bf_1.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+for cl in objects.known_clusters.values():
+    for t in objects.tesserae_bf_2.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+
+for cl in objects.tristan_clusters.values():
+    for t in objects.tesserae_bf_2.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+for cl in objects.known_clusters.values():
+    for t in objects.tesserae_bf_3.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
+
+
+for cl in objects.tristan_clusters.values():
+    for t in objects.tesserae_bf_3.values():
+        if t.contains(cl):
+            print(cl.name, t.name)
+            cluster_tiles[cl.name] = t.name
