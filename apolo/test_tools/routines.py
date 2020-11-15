@@ -3,14 +3,14 @@ from apolo.clustering import cplots, ctools
 from apolo.data import dirconfig
 from apolo.test_tools.grid import perform_grid_score, summarize_score
 from apolo.test_tools.utils import setup_region, add_pseudocolor
-from apolo.catalog_proc.utils import read_fits_table, write_fits_table
+from apolo.catalog_proc.utils import read_fits_table
 from glob import glob
 
 
 def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir=dirconfig.cross_vvv_2mass_combis_gaia,
                        out_dir=dirconfig.test_knowncl, cluster_selection_method='leaf'):
     """
-    This routine take a cluster object and a tile to perform a clustering using best values from Silluete score
+    This routine take a cluster object and a tile to perform a clustering using best values from Silhouette score
     (assuming mcs=ms) and using data in defined datadir directory
     :param out_dir: String. Path to the output dir
     :param data_dir: string
@@ -104,6 +104,7 @@ def tile_routine(tile_file, output_dir, space_param='Mini-alternative',):
     column,
     Parameters
     ----------
+    space_param
     tile_file
     output_dir
 
@@ -161,4 +162,3 @@ def tile_routine(tile_file, output_dir, space_param='Mini-alternative',):
     cplots.plot_clustered_data(table, output_dir, summarized_scores)
 
     return True
-
