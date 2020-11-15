@@ -139,7 +139,9 @@ def tile_routine(tile_file, output_dir, space_param='Mini-alternative',):
 
     # In case that clustering was not successfully return False
     if len(scores) == 0:
+        print('-' * 20)
         print('No clusters found in tile: ', tile_name)
+        print('-' * 20)
         return False
 
     score_filepath = path.join(output_dir, 'scores_' + tile_name + '.ecsv')
