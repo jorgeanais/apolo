@@ -29,11 +29,7 @@ n_processes = 4
 
 
 tile_files = glob.glob(tiles_dir + '/tile_bf*.fits')
-# tile_files.sort()
-
-# Test ----
-# tile_file = '/home/jorge/Documents/DATA/test/tiling/tile_0944.fits'
-# routines.tile_routine(tile_file, output_dir)
+tile_files.sort()
 
 models = ((f, output_dir) for f in tile_files)
 with mp.Pool(n_processes) as pool:

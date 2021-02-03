@@ -8,7 +8,7 @@ from glob import glob
 
 
 def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir=dirconfig.cross_vvv_2mass_combis_gaia,
-                       out_dir=dirconfig.test_knowncl, cluster_selection_method='leaf'):
+                       out_dir=dirconfig.test_knowncl, radial_size=2.0, cluster_selection_method='leaf'):
     """
     This routine take a cluster object and a tile to perform a clustering using best values from Silhouette score
     (assuming mcs=ms) and using data in defined datadir directory
@@ -18,17 +18,19 @@ def clustering_routine(region_of_interest, tile, space_param='Phot+PM', data_dir
     :param region_of_interest: StellarCluster or EmptyRegion object
     :param tile: tile object
     :param cluster_selection_method:
+    :param radial_size:
     :return:
 
     Parameters
     ----------
+    radial_size
     cluster_selection_method
     cluster_selection_method
     """
 
     print(region_of_interest, tile)
     catalog_file = tile.get_file(data_dir)
-    tile_region = setup_region(catalog_file, region_of_interest, times=2.0)
+    tile_region = setup_region(catalog_file, region_of_interest, times=radial_size)
     scores = perform_grid_score(tile_region,
                                 mcs_range=(5, 50),
                                 ms_range=(5, 50),
@@ -63,6 +65,7 @@ def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_sampl
                            space_param='Phot+PM',
                            data_dir=dirconfig.cross_vvv_2mass_combis_gaia,
                            out_dir=dirconfig.test_knowncl,
+                           radial_size=2.0,
                            cluster_selection_method='leaf'):
     """
     This routine take a cluster object and a tile to perform a clustering using provided hyper-parameters (mcs, ms, csm)
@@ -70,6 +73,7 @@ def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_sampl
 
     Parameters
     ----------
+    radial_size
     region_of_interest
     tile
     min_cluster_size
@@ -86,7 +90,7 @@ def fix_hyperparms_routine(region_of_interest, tile, min_cluster_size, min_sampl
 
     print(region_of_interest, tile)
     catalog_file = tile.get_file(data_dir)
-    tile_region = setup_region(catalog_file, region_of_interest, times=2.0)
+    tile_region = setup_region(catalog_file, region_of_interest, times=radial_size)
 
     ctools.do_hdbscan(tile_region,
                       space_param=space_param,

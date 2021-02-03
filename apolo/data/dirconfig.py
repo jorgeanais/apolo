@@ -44,4 +44,5 @@ cross_combisphot_gaia_cont = path.join(cross_data, 'x_combisphot-gaia_cont')
 test_knowncl = path.join(tests, 'known_clusters')
 test_tiles = path.join(tests, 'entire_tiles')
 test_tiling = path.join(tests, 'tiling')
+test_candidates = path.join(tests, 'candidates')
 

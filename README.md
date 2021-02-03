@@ -101,6 +101,8 @@ In the `scripts` folder, there are some codes that demonstrate how use apolo:
 3. `test_known_clusters.pu`: This script automatically perform our current methodology to a set of clusters in parallel.
 4. `join_tiles.py`: It spatially merge all the catalogs in one (in order to avoid spatial cuts in our region of interest).
 5. `tiling.py`: It spatially separate the region of interest in tiles using a density-aware approach (to make it computationally approachable).
+6. `perform_clustering_tiles.py`: It perform the search in the region of interest in a parallel fashion.
+7. `candidates_selection.py`: Extract some stats from the resulting gruops and select candidates based on filtering some features.
 
 
 

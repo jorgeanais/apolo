@@ -25,14 +25,15 @@ complete_tile_list = which_tile(complete_object_list, objects.all_tiles)
 
 data_dir = dirconfig.cross_vvv_2mass_combis_gaia
 out_dir = path.join(dirconfig.test_knowncl, 'clustering_no_grid')
+#out_dir = '/home/jorge/sw_scores'
 make_dir(out_dir)
 
 object_list = [objects.m81]
 tiles = which_tile(object_list, objects.all_tiles)
 
-space_param = 'Phot+PM'
-mcs = 16
-ms = 5
+space_param = 'Colors+PM'
+mcs = 9
+ms = 9
 
 # This line setup the arguments for function clustering_routine
 models = [(cl, tile, mcs, ms, space_param, data_dir, out_dir) for cl, tile in zip(object_list, tiles)]

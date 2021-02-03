@@ -91,9 +91,16 @@ tesserae_4096 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['
 tristan_clusters = {row['Cluster']: StellarCluster(row['Cluster'], (row['GLON'], row['GLAT']), row['r50'] * 60)
                     for row in Table.read(path.join(path.dirname(__file__), 'files/cantant2020_sel.csv'), format='csv')}
 
+# Candidates found
+apolo01 = StellarCluster('0782_1', (336.3695510716273, 0.19340224129191727), 1.0)
+apolo02 = StellarCluster('0789_0', (336.546544097125, -0.017684136067132566), 1.0)
+apolo03 = StellarCluster('0792_0', (336.42623918937073, 0.18625562511438196), 1.0)
+apolo04 = StellarCluster('0832_1', (336.5804350718638, 0.01962147862413396), 1.0)
 
-# A dictionary with all the regions
-all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **tristan_clusters}
+candidates = {'0782_1': apolo01, '0789_0': apolo02, '0792_0': apolo03, '0832_1': apolo04}
+
+# A dictionary with all the star clusters and regions
+all_regions = {**known_clusters, **empty_regions_close_to_known_clusters, **tristan_clusters, **candidates}
 
 # Load tessera objects from file
 
@@ -108,3 +115,4 @@ tesserae_bf_2 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['
 
 tesserae_bf_3 = {int(row['tile']): Tessera(int(row['tile']), row['l_min'], row['l_max'], row['b_min'], row['b_max'])
                  for row in Table.read(path.join(path.dirname(__file__), 'files/log_tiling_bf3.ecsv'), format='ascii.ecsv')}
+
