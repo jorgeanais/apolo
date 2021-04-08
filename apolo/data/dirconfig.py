@@ -5,7 +5,8 @@ In this module, the directory structure is defined with shortcuts for each direc
 """
 
 # Base path definition
-base_data_path = '/home/jorge/Documents/DATA'
+# base_data_path = '/home/jorge/Documents/DATA'
+base_data_path = '/media/jorge/BLUE/TESIS_DATA/DATA'
 
 # Raw data is stored in raw_data_path, meanwhile processed or intermediate-stage data is stored in 'proc_data'.
 raw_data = path.join(base_data_path, 'raw')

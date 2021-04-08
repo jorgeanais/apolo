@@ -92,6 +92,14 @@ class Tile:
     def __str__(self):
         return self._name
 
+    @property
+    def l_center(self):
+        return (self._lmax + self._lmin) * 0.5
+
+    @property
+    def b_center(self):
+        return (self._bmax + self._bmin) * 0.5
+
     def contains(self, cluster):
         b = cluster.coord.b.deg
         l = cluster.coord.l.deg
@@ -125,4 +133,5 @@ class Tessera(Tile):
     @property
     def area(self):
         return self._area
+
 

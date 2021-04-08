@@ -37,6 +37,8 @@ def setup_data(table, space_param='Phot+PM', cols=None, scale_lb=True):
         cols = ('l', 'b', 'mag_J', 'mag_H', 'mag_Ks', 'pmra', 'pmdec')
     elif space_param == 'Mini-alternative':
         cols = ('l', 'b', 'H-Ks', 'J-Ks', 'J-H', 'pmra', 'pmdec')
+    elif space_param == 'carlos':
+        cols = ('l', 'b', 'H-Ks', 'J-Ks', 'pmra', 'pmdec')
     elif space_param == 'custom':
         if cols is None:
             raise ValueError('You must give cols argument with the parameters in a tuple')

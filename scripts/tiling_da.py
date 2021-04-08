@@ -11,8 +11,8 @@ This script performs a spatial tiling over a catalog an produces as much files a
 """
 
 table = read_fits_table(path.join(dirconfig.test_tiling, 'complete_region.fits'))
-# kd_tree_tiling(table, leaf_size=5000)   # 4096
-kd_tree_tiling(table, leaf_size=10000)  # 2048
+kd_tree_tiling(table, leaf_size=5000)   # 4096
+# kd_tree_tiling(table, leaf_size=10000)  # 2048
 # kd_tree_tiling(table, leaf_size=20000)  # 1024
 
 n_tiles = max(table['tile']) + 1
