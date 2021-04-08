@@ -28,6 +28,6 @@ for tile in range(n_tiles):
     area = (l_max - l_min) * (np.sin(b_max * np.pi / 180.0) - np.sin(b_min * np.pi / 180.0)) * 180.0 / np.pi
     log_table.add_row([tile, n, l_min, l_max, b_min, b_max, area])
 
-log_table.write(path.join(dirconfig.test_tiling, 'log_tiling_2048.ecsv'), format='ascii.ecsv')
+log_table.write(path.join(dirconfig.test_tiling, 'log_tiling_4096.ecsv'), format='ascii.ecsv')
 
 
