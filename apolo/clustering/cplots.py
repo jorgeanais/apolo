@@ -222,11 +222,12 @@ def make_plot_roi(dic_with_tiles=tiles_search_area, clusters=known_clusters,
         if annotation:
             plt.text(left + 0.5 * width, bottom + 0.5 * height, t.name,
                      horizontalalignment='center', verticalalignment='center',
-                     color='red')
+                     color='red', fontsize='xx-small')
 
-    for k, c in clusters.items():
-        plt.plot(c.coord.l.deg, c.coord.b.deg, 'o')
-        plt.text(c.coord.l.deg, c.coord.b.deg - 0.1, c.name, horizontalalignment='center', verticalalignment='center')
+    if clusters is not None:
+        for k, c in clusters.items():
+            plt.plot(c.coord.l.deg, c.coord.b.deg, 'o')
+            plt.text(c.coord.l.deg, c.coord.b.deg - 0.1, c.name, horizontalalignment='center', verticalalignment='center')
 
     plt.xlim(342., 335)
     plt.ylim(-1.3, 1.3)
