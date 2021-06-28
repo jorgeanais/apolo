@@ -108,7 +108,7 @@ In the `scripts` folder, there are some codes that demonstrate how use apolo:
 Results
 -------
 
-we were able to characterize for first time, using near-infrared photometry and proper motions,
+We were able to characterize for first time, using near-infrared photometry and proper motions,
 the massive stellar population of three clusters currently reported at the far end of the Galactic
 bar: [MCM2005b]81, VVV CL074, and VVV CL086. The results from this study suggest that cluster VVV CL086
 is closer than previously reported and therefore not in the region of the bar's far end. From the search
