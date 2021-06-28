@@ -105,5 +105,23 @@ In the `scripts` folder, there are some codes that demonstrate how use apolo:
 7. `candidates_selection.py`: Extract some stats from the resulting gruops and select candidates based on filtering some features.
 
 
+Results
+-------
 
+we were able to characterize for first time, using near-infrared photometry and proper motions,
+the massive stellar population of three clusters currently reported at the far end of the Galactic
+bar: [MCM2005b]81, VVV CL074, and VVV CL086. The results from this study suggest that cluster VVV CL086
+is closer than previously reported and therefore not in the region of the bar's far end. From the search
+using Apolo, we identify three new young massive cluster candidates and recover one known cluster.
+The new star cluster candidates are _Apolo 2_ at Galactic coordinates l=336.546°, b=-0.018°;
+_Apolo 3_ at l=336.425°, b=0.187°; and _Apolo 4_ at l=336.580°, b=0.021°, with near-infrared
+color J - K_s ~ 3.5 mag and mean proper motions, <μ<sub>α*</sub>>= -4.5±0.8 mas/yr and <μ<sub>ẟ</sub>> = -5.2±0.7 mas/yr,
+consistent with the expected proper motions for objects at the far end of the bar according to the Besançon
+model of stellar population synthesis in our Galaxy, and with the proper motions of the known cluster
+at this place.
+
+Download my thesis [here!](https://drive.google.com/file/d/1OcrNnFa7S-o3oVHwSqg-SB1IkH94lpzt/view)
+
+![image](refimage.png)
+Cluster candidate Apolo 2.
 
