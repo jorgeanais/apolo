@@ -1,7 +1,7 @@
 Apolo
 =====
 
-> Status: Thesis defended on March 2021.
+> Status: Thesis defended on March 2021. Download my thesis [here!](https://drive.google.com/file/d/1OcrNnFa7S-o3oVHwSqg-SB1IkH94lpzt/view)
 
 This code is being developed as part of my master thesis in Astronomy. The idea is
 to develop an algorithm to find stellar-clusters, focusing in the region of
@@ -120,7 +120,6 @@ consistent with the expected proper motions for objects at the far end of the ba
 model of stellar population synthesis in our Galaxy, and with the proper motions of the known cluster
 at this place.
 
-Download my thesis [here!](https://drive.google.com/file/d/1OcrNnFa7S-o3oVHwSqg-SB1IkH94lpzt/view)
 
 ![image](refimage.png)
 Cluster candidate Apolo 2.
