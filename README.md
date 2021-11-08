@@ -1,7 +1,7 @@
 Apolo
 =====
 
-> Status: In development 
+> Status: Thesis defended on March 2021.
 
 This code is being developed as part of my master thesis in Astronomy. The idea is
 to develop an algorithm to find stellar-clusters, focusing in the region of
